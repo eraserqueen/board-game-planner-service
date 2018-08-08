@@ -39,5 +39,24 @@ describe('Scheduler', function () {
                 }];
             assert.deepStrictEqual(scheduler.run({playerPreferences}), expected);
         });
+        it('should return schedule when playerPreferences are provided', () => {
+           const playerPreferences = [
+               { playerName: 'Arthur', order:1, gameId: 'Dominion'},
+               { playerName: 'Arthur', order:2, gameId: 'Pandemic'},
+               { playerName: 'Arthur', order:3, gameId: 'Splendor'},
+               { playerName: 'Betty', order:1, gameId: 'Dominion'},
+               { playerName: 'Betty', order:2, gameId: 'Evolution'},
+               { playerName: 'Betty', order:3, gameId: 'Pandemic'},
+               { playerName: 'Charlie', order:1, gameId: 'Dominion'},
+               { playerName: 'Charlie', order:2, gameId: 'Evolution'},
+               { playerName: 'Charlie', order:3, gameId: 'Eldorado'},
+           ];
+           const expected = [
+               {order:1, gameId:'Dominion'},
+               {order:2, gameId:'Evolution'},
+               {order:3, gameId:'Pandemic'},
+           ];
+           assert.deepStrictEqual(scheduler.run({playerPreferences}), expected);
+        });
     });
 });
