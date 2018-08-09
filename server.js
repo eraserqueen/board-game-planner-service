@@ -13,7 +13,7 @@ server.use(jsonServer.bodyParser)
 server.use((req, res, next) => {
     if (req.method === 'PUT'
         && req.path.startsWith('/events')
-        && req.query.runScheduler) {
+        && req.query.runScheduler === 'true') {
             req.body.schedule = scheduler.run(req.body);
     }
     // Continue to JSON Server router
