@@ -74,16 +74,20 @@
   ],
   "players": [
     {
-      "name": "Dom"
+      "name": "Dom",
+      "avatar": "https://www.gravatar.com/avatar/84ef5fffabcdb8a829bbdc54deaa3d79?r=pg&d=identicon"
     },
     {
-      "name": "Tim"
+      "name": "Tim",
+      "avatar": "https://www.gravatar.com/avatar/dc2054afd537ddc98afd9347136494ac?r=pg&d=identicon"
     },
     {
-      "name": "Gilles"
+      "name": "Gilles",
+      "avatar": "https://www.gravatar.com/avatar/df02ff5f8ec66e21c657caeaa6a599fa?r=pg&d=identicon"
     },
     {
-      "name": "Carla"
+      "name": "Carla",
+      "avatar": "https://www.gravatar.com/avatar/0ffab42260504ca68e08b5be7a778897?r=pg&d=identicon"
     }
   ]
 }
