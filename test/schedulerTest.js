@@ -1,11 +1,10 @@
-const assert = require('assert');
-
+const expect = require('chai').expect;
 const scheduler = require("../src/scheduler");
 
 describe('Scheduler', function () {
     describe('run', function () {
         it('should return an empty array when playerPreferences are empty', function () {
-            assert.deepStrictEqual(scheduler.run({}), []);
+            expect(scheduler.run({})).to.eql([]);
         });
         it('should return user preferences when event has only one participant', function () {
             const playerPreferences = [
@@ -37,7 +36,7 @@ describe('Scheduler', function () {
                     "order": 3,
                     "gameId": "8669904c-4e77-4db3-b01a-c1a9a712c7bd"
                 }];
-            assert.deepStrictEqual(scheduler.run({playerPreferences}), expected);
+            expect(scheduler.run({playerPreferences})).to.eql(expected);
         });
         it('should return schedule when playerPreferences are provided', () => {
            const playerPreferences = [
@@ -56,7 +55,7 @@ describe('Scheduler', function () {
                {order:2, gameId:'Evolution'},
                {order:3, gameId:'Pandemic'},
            ];
-           assert.deepStrictEqual(scheduler.run({playerPreferences}), expected);
+           expect(scheduler.run({playerPreferences})).to.eql(expected);
         });
     });
 });
