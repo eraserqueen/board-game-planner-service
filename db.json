@@ -28,65 +28,117 @@
   ],
   "events": [
     {
-      "id": "c5a10130-6252-4acd-9622-39eae72720de",
-      "dateTimeStart": "2018-08-31T08:00:59.409Z",
-      "dateTimeEnd": "2018-08-31T13:00:59.000Z",
+      "id": "92e714f6-8958-47c3-87b7-af5a6a02cd53",
+      "dateTimeStart": "2018-09-15T05:38:40.086Z",
+      "dateTimeEnd": "2018-09-15T09:38:44.000Z",
       "playerPreferences": [
-        {
-          "playerName": "Gilles",
-          "order": 1,
-          "gameId": "d2289e6a-e537-4061-8dca-23c148efe60d"
-        },
-        {
-          "playerName": "Gilles",
-          "order": 2,
-          "gameId": "a71a8769-3bc0-4d3c-b144-2acba9d5468d"
-        },
-        {
-          "playerName": "Gilles",
-          "order": 3,
-          "gameId": "8669904c-4e77-4db3-b01a-c1a9a712c7bd"
-        },
-        {
-          "playerName": "Dom",
-          "order": 2,
-          "gameId": "a71a8769-3bc0-4d3c-b144-2acba9d5468d"
-        },
-        {
-          "playerName": "Dom",
-          "order": 3,
-          "gameId": "8669904c-4e77-4db3-b01a-c1a9a712c7bd"
-        },
         {
           "playerName": "Dom",
           "order": 1,
           "gameId": "a6cde340-173e-4f8a-af6f-f6a08ea1e23a"
+        },
+        {
+          "playerName": "Dom",
+          "order": 2,
+          "gameId": "4aa37890-8464-4420-98c8-cefcee911c7f"
+        },
+        {
+          "playerName": "Dom",
+          "order": 3,
+          "gameId": "d2289e6a-e537-4061-8dca-23c148efe60d"
+        },
+        {
+          "playerName": "Gilles",
+          "order": 1,
+          "gameId": "4aa37890-8464-4420-98c8-cefcee911c7f"
+        },
+        {
+          "playerName": "Gilles",
+          "order": 2,
+          "gameId": "a71a8769-3bc0-4d3c-b144-2acba9d5468d"
+        },
+        {
+          "playerName": "Gilles",
+          "order": 3,
+          "gameId": "a6cde340-173e-4f8a-af6f-f6a08ea1e23a"
+        },
+        {
+          "playerName": "Tim",
+          "order": 1,
+          "gameId": "a71a8769-3bc0-4d3c-b144-2acba9d5468d"
+        },
+        {
+          "playerName": "Tim",
+          "order": 2,
+          "gameId": "a6cde340-173e-4f8a-af6f-f6a08ea1e23a"
+        },
+        {
+          "playerName": "Tim",
+          "order": 3,
+          "gameId": "8669904c-4e77-4db3-b01a-c1a9a712c7bd"
         }
       ],
-      "schedule": []
+      "schedule": [
+        {
+          "gameId": "a6cde340-173e-4f8a-af6f-f6a08ea1e23a",
+          "order": 1
+        },
+        {
+          "gameId": "4aa37890-8464-4420-98c8-cefcee911c7f",
+          "order": 2
+        },
+        {
+          "gameId": "a71a8769-3bc0-4d3c-b144-2acba9d5468d",
+          "order": 3
+        }
+      ]
     },
     {
-      "id": "142f07e7-12e1-43fa-a55f-099d08f904ce",
-      "dateTimeStart": "2018-08-06T04:37:22.640Z",
-      "dateTimeEnd": "2018-08-06T08:37:24.000Z",
-      "playerPreferences": []
+      "id": "18c28ee7-c03c-4f22-b773-2448ae5db94f",
+      "dateTimeStart": "2018-08-21T00:14:32.000Z",
+      "dateTimeEnd": "2018-08-21T11:14:32.000Z",
+      "playerPreferences": [
+        {
+          "playerName": "Dom",
+          "order": 1,
+          "gameId": "8669904c-4e77-4db3-b01a-c1a9a712c7bd"
+        },
+        {
+          "playerName": "Dom",
+          "order": 2,
+          "gameId": "a6cde340-173e-4f8a-af6f-f6a08ea1e23a"
+        },
+        {
+          "playerName": "Dom",
+          "order": 3,
+          "gameId": "a71a8769-3bc0-4d3c-b144-2acba9d5468d"
+        }
+      ]
     }
   ],
   "players": [
     {
       "name": "Dom",
+      "hash": "$2a$10$nsyEdvdINMV9lIPM.PlTvODAZsQO9yYAiwfAQDSbyDCZDaG0btPga",
+      "salt": "$2a$10$nsyEdvdINMV9lIPM.PlTvO",
       "avatar": "https://www.gravatar.com/avatar/84ef5fffabcdb8a829bbdc54deaa3d79?r=pg&d=identicon"
     },
     {
       "name": "Tim",
+      "hash": "$2a$10$nsyEdvdINMV9lIPM.PlTvODAZsQO9yYAiwfAQDSbyDCZDaG0btPga",
+      "salt": "$2a$10$nsyEdvdINMV9lIPM.PlTvO",
       "avatar": "https://www.gravatar.com/avatar/dc2054afd537ddc98afd9347136494ac?r=pg&d=identicon"
     },
     {
       "name": "Gilles",
+      "hash": "$2a$10$nsyEdvdINMV9lIPM.PlTvODAZsQO9yYAiwfAQDSbyDCZDaG0btPga",
+      "salt": "$2a$10$nsyEdvdINMV9lIPM.PlTvO",
       "avatar": "https://www.gravatar.com/avatar/df02ff5f8ec66e21c657caeaa6a599fa?r=pg&d=identicon"
     },
     {
       "name": "Carla",
+      "hash": "$2a$10$nsyEdvdINMV9lIPM.PlTvODAZsQO9yYAiwfAQDSbyDCZDaG0btPga",
+      "salt": "$2a$10$nsyEdvdINMV9lIPM.PlTvO",
       "avatar": "https://www.gravatar.com/avatar/0ffab42260504ca68e08b5be7a778897?r=pg&d=identicon"
     }
   ]
