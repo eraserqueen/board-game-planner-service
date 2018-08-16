@@ -15,7 +15,7 @@ server.use(jsonServer.bodyParser);
 server.post('/auth', (req, res) => {
         const user = db.authenticate(req.body.username, req.body.password);
         if(user.error) {
-            res.status(user.status).send(user.error);
+            res.status(user.status).json(user);
         } else {
             res.json({
                 user,
@@ -28,7 +28,7 @@ server.post('/auth', (req, res) => {
 server.post('/register', (req, res) => {
         const user = db.register(req.body.username, req.body.password);
         if(user.error) {
-            res.status(user.status).send(user.error);
+            res.status(user.status).json(user);
         } else {
             res.json({
                 user,
