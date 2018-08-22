@@ -1,4 +1,3 @@
-const expect = require('chai').expect;
 const path = require('path');
 const fs = require('fs');
 const ServerMock = require('mock-http-server');
@@ -18,7 +17,7 @@ describe('BGG client', () => {
     });
 
     describe('getCollectionsAsync', () => {
-        it('should try request again when status code is 202', async () => {
+        test('should try request again when status code is 202', async () => {
             const xmlResponse = fs.readFileSync(path.join(__dirname, '__mocks/bgg-collection-sample-response.xml'), 'utf8');
             const succeedOnAttemptNum = 3;
             server.on({
@@ -34,28 +33,31 @@ describe('BGG client', () => {
                 }
             });
             const collection = await client.getCollectionAsync('eraserqueen');
-            expect(collection).to.eq(xmlResponse);
-            expect(server.requests()).to.have.lengthOf(succeedOnAttemptNum);
+            expect(collection).toEqual(xmlResponse);
+            expect(server.requests()).toHaveLength(succeedOnAttemptNum);
         });
-        it('should fail if server does not return a success response after 3 attempts', async () => {
-            server.on({
-                method: 'GET',
-                path: '*',
-                reply: {status: 202}
-            });
-            const collection = await client.getCollectionAsync('eraserqueen');
-            expect(collection).to.be.null;
-            expect(server.requests()).to.have.lengthOf(3);
-        });
-        it('should fail if server returns an error', async () => {
+        test(
+            'should fail if server does not return a success response after 3 attempts',
+            async () => {
+                server.on({
+                    method: 'GET',
+                    path: '*',
+                    reply: {status: 202}
+                });
+                const collection = await client.getCollectionAsync('eraserqueen');
+                expect(collection).toBeNull();
+                expect(server.requests()).toHaveLength(3);
+            }
+        );
+        test('should fail if server returns an error', async () => {
             server.on({
                 method: 'GET',
                 path: '*',
                 reply: {status: 400}
             });
             const collection = await client.getCollectionAsync('eraserqueen');
-            expect(collection).to.be.null;
-            expect(server.requests()).to.have.lengthOf(1);
+            expect(collection).toBeNull();
+            expect(server.requests()).toHaveLength(1);
         });
     });
 });
