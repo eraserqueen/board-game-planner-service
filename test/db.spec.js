@@ -5,9 +5,15 @@ const fs = require('fs');
 
 describe('db', () => {
 
-    const dbFile = path.join(__dirname, 'db.test.json')
+    const dbFile = path.join(__dirname, 'testDB.json')
     const db = require('../src/db')(dbFile);
 
+    before((done) => {
+        fs.writeFile(dbFile, null, null, done);
+    });
+    after((done) => {
+        fs.unlink(dbFile, done);
+    });
     beforeEach(() => {
         db.init();
         db.clear();
