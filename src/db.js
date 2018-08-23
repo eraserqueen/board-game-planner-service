@@ -1,43 +1,46 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const bcrypt = require('bcryptjs');
+const {USER_NOT_FOUND, USER_CONFLICT} = require("./errorMessages");
 
 module.exports = (dbFile) => {
+    this.db = low(new FileSync(dbFile));
 
-    const adapter = new FileSync(dbFile);
-    const db = low(adapter);
     return ({
         init: () => {
-            db.defaults({games: [], players: [], events: []}).write();
+            this.db.defaults({games: [], players: [], events: []}).write();
         },
         clear: () => {
-            db.set('games', [])
+            this.db.set('games', [])
                 .set('players', [])
                 .set('events', [])
                 .write();
         },
-        authenticate: (name, password) => {
-            const player = db.get('players').find({name}).value();
-            if (player && bcrypt.hashSync(password, player.salt) === player.hash) {
-                return ({name: player.name, avatar: player.avatar || ''});
-            }
-            return ({status: 404, error: 'invalid username or password'});
+        findUser: (name, password) => {
+            return new Promise((resolve, reject) => {
+                const player = this.db.get('players').find({name}).value();
+                if (player && bcrypt.hashSync(password, player.salt) === player.hash) {
+                    resolve({name: player.name, avatar: player.avatar || ''});
+                } else {
+                    reject(USER_NOT_FOUND)
+                }
+            });
         },
-        register: (name, password) => {
-            const existing = db.get('players').find({name}).value();
-            if (existing) {
-                return ({status: 409, error: 'username already exists'});
-            }
-            if (!password) {
-                return ({status: 400, error: 'password cannot be empty'});
-            }
-            const salt = bcrypt.genSaltSync(10);
-            const hash = bcrypt.hashSync(password, salt);
+        addNewUser: (name, password) => {
+            return new Promise((resolve, reject) => {
+                const existing = this.db.get('players').find({name}).value();
+                if (existing) {
+                    reject(USER_CONFLICT);
+                } else {
 
-            db.get('players').push({name, hash, salt}).write();
+                    const salt = bcrypt.genSaltSync(10);
+                    const hash = bcrypt.hashSync(password, salt);
 
-            return ({name, avatar: ''}); // TODO md5 hash for gravatar
+                    this.db.get('players').push({name, hash, salt}).write();
 
+                    resolve({name, avatar: ''}); // TODO md5 hash for gravatar
+                }
+            });
         },
     });
 };

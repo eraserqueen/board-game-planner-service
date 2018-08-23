@@ -6,6 +6,9 @@
     "start": "node server.js",
     "test": "jest"
   },
+  "config": {
+    "db": "./data/db.json"
+  },
   "author": "Dominique Rolin",
   "license": "ISC",
   "dependencies": {

@@ -1,40 +1,35 @@
+const _ = require('lodash');
 const path = require('path');
 const jsonServer = require('json-server');
 const server = jsonServer.create();
-const dbFile = path.join(__dirname, 'db.json');
-const db = require('./src/db')(dbFile);
+const dbFile = path.join(__dirname, process.env.npm_package_config_db);
 const router = jsonServer.router(dbFile);
 const middlewares = jsonServer.defaults();
 
+const db = require('./src/db')(dbFile);
+const user = require('./src/user')(db);
 const scheduler = require('./src/scheduler');
+const {USERNAME_OR_PASSWORD_MISSING} = require("./src/errorMessages");
 
 server.use(middlewares);
 server.use(jsonServer.bodyParser);
 
 
 server.post('/auth', (req, res) => {
-        const user = db.authenticate(req.body.username, req.body.password);
-        if(user.error) {
-            res.status(user.status).json(user);
-        } else {
-            res.json({
-                user,
-                token: 'DUMMY_JSON_WEB_TOKEN'
-            });
-        }
+    if (_.isEmpty(_.get(req, 'body.username')) || _.isEmpty(_.get(req, 'body.password'))) {
+        res.status(400).json({error: USERNAME_OR_PASSWORD_MISSING});
+    }
+    const result = user.authenticate(req.body.username, req.body.password);
+    res.status(result.error ? 500 : 200).json(result);
 });
 
 
 server.post('/register', (req, res) => {
-        const user = db.register(req.body.username, req.body.password);
-        if(user.error) {
-            res.status(user.status).json(user);
-        } else {
-            res.json({
-                user,
-                token: 'DUMMY_JSON_WEB_TOKEN'
-            });
-        }
+    if (_.isEmpty(_.get(req, 'body.username')) || _.isEmpty(_.get(req, 'body.password'))) {
+        res.status(400).json({error: USERNAME_OR_PASSWORD_MISSING});
+    }
+    const result = user.register(req.body.username, req.body.password);
+    res.status(result.error ? 500 : 200).json(result);
 });
 
 server.use((req, res, next) => {
