@@ -1,17 +1,15 @@
 const fs = require('fs');
-const path = require('path');
-const dbFile = path.join(__dirname, '../../../data/__tests__/testDB.json');
-const db = require('../db')(dbFile);
+const db = require('../db');
 
 const {USER_NOT_FOUND, USER_CONFLICT} = require("../../errorMessages");
 
 describe('db', () => {
 
     beforeAll((done) => {
-        fs.writeFile(dbFile, null, null, done);
+        fs.writeFile(db.getDbFilePath(), null, null, done);
     });
     afterAll((done) => {
-        fs.unlink(dbFile, done);
+        fs.unlink(db.getDbFilePath(), done);
     });
     beforeEach(() => {
         db.init();
@@ -24,7 +22,7 @@ describe('db', () => {
             const response = await db.addNewUser('Alice', 'password');
             expect(response).toEqual({name: 'Alice', avatar: ''});
 
-            const storage = JSON.parse(fs.readFileSync(dbFile, 'utf-8'));
+            const storage = JSON.parse(fs.readFileSync(db.getDbFilePath(), 'utf-8'));
             expect(storage.players.length).toBe(1);
             expect(storage.players[0].salt).toBeDefined();
             expect(storage.players[0].hash).toBeDefined();

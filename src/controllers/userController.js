@@ -1,7 +1,5 @@
 const _ = require('lodash');
-const path = require('path');
-const dbFile = path.join(__dirname, '../../', process.env.npm_package_config_db);
-const db = require('../services/db')(dbFile);
+const db = require('../services/db');
 const auth = require('../services/auth');
 const {USERNAME_OR_PASSWORD_MISSING} = require("../errorMessages");
 

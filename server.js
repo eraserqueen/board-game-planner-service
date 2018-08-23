@@ -1,7 +1,7 @@
 const path = require('path');
 const jsonServer = require('json-server');
 const server = jsonServer.create();
-const dbFile = path.join(__dirname, process.env.npm_package_config_db);
+const dbFile = require('./src/services/db').getDbFilePath();
 
 const authController = require('./src/controllers/authController');
 const schedulerController = require('./src/controllers/schedulerController');
