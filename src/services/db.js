@@ -1,4 +1,4 @@
-const low = require('lowdb');
+const lowDB = require('lowdb');
 const path = require('path');
 const FileSync = require('lowdb/adapters/FileSync');
 const bcrypt = require('bcryptjs');
@@ -14,7 +14,7 @@ function getDbFilePath() {
     return path.join(__dirname, '../../', dbFile);
 }
 
-const db = low(new FileSync(getDbFilePath()));
+const db = lowDB(new FileSync(getDbFilePath()));
 module.exports = {
     getDbFilePath,
     init: () => {
@@ -27,29 +27,25 @@ module.exports = {
             .write();
     },
     findUser: (name, password) => {
-        return new Promise((resolve, reject) => {
-            const player = db.get('players').find({name}).value();
-            if (player && bcrypt.hashSync(password, player.salt) === player.hash) {
-                resolve({name: player.name, avatar: player.avatar || ''});
-            } else {
-                reject(USER_NOT_FOUND)
-            }
-        });
+        const player = db.get('players').find({name}).value();
+        if (player && bcrypt.hashSync(password, player.salt) === player.hash) {
+            return ({name: player.name, avatar: player.avatar || ''});
+        } else {
+            throw new Error(USER_NOT_FOUND)
+        }
     },
     addNewUser: (name, password) => {
-        return new Promise((resolve, reject) => {
-            const existing = db.get('players').find({name}).value();
-            if (existing) {
-                reject(USER_CONFLICT);
-            } else {
+        const existing = db.get('players').find({name}).value();
+        if (existing) {
+            throw new Error(USER_CONFLICT);
+        }
 
-                const salt = bcrypt.genSaltSync(10);
-                const hash = bcrypt.hashSync(password, salt);
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
 
-                db.get('players').push({name, hash, salt}).write();
+        db.get('players').push({name, hash, salt}).write();
 
-                resolve({name, avatar: ''}); // TODO md5 hash for gravatar
-            }
-        });
+        return ({name, avatar: ''}); // TODO md5 hash for gravatar
+
     },
 };

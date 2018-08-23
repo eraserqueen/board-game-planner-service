@@ -1,5 +1,4 @@
-const {VALID_TOKEN, EXPIRED_TOKEN, DECODED_JWT} = require("../../services/__mocks__/auth");
-
+const auth = require('../../services/auth');
 const authController = require('../authController');
 jest.mock('../../services/auth');
 
@@ -10,26 +9,32 @@ describe('Auth Controller', () => {
         status: jest.fn().mockReturnValue({json: resJsonMock}),
     };
 
-    test('allows anonymous /auth call', () => {
+    test('does not verify JWT on /auth call', () => {
         authController({method: 'POST', path: '/auth'}, res, next);
         expect(next).toBeCalled();
         expect(res.status).not.toHaveBeenCalled();
     });
-    test('allows anonymous /register call', () => {
+    test('does not verify JWT on /register call', () => {
         authController({method: 'POST', path: '/register'}, res, next);
         expect(next).toBeCalled();
         expect(res.status).not.toHaveBeenCalled();
     });
-    test('allows calls with a valid JWT', () => {
+    test('verifies JWT on all other calls', () => {
+        auth.verifyToken.mockImplementation(() => ({
+            jwt: {
+                username: 'user',
+                expires: 123456789
+            }
+        }));
         let req = {
             method: 'GET',
             path: '/events',
             headers: {
-                authorization: 'Bearer ' + VALID_TOKEN
+                authorization: 'Bearer this_is_a_valid_token'
             }
         };
         authController(req, res, next);
-        expect(req.jwt).toEqual(DECODED_JWT);
+        expect(req.jwt).toEqual({username: 'user', expires: 123456789});
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();
 
@@ -46,11 +51,14 @@ describe('Auth Controller', () => {
         expect(resJsonMock).toHaveBeenCalledWith({error: 'Unauthorized access'});
     });
     test('returns 401 response when login is required and JWT is invalid', () => {
+        auth.verifyToken.mockImplementation(() => ({
+            error: 'Expired token'
+        }));
         let req = {
             method: 'GET',
             path: '/events',
             headers: {
-                authorization: 'Bearer ' + EXPIRED_TOKEN
+                authorization: 'Bearer expired_token'
             }
         };
         authController(req, res, next);
