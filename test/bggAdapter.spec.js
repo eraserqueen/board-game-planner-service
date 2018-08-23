@@ -35,7 +35,7 @@ describe('BGG Adapter', () => {
             expect(actual).toEqual([]);
         });
         test('maps collection to games list', async () => {
-            const xml = fs.readFileSync(path.join(__dirname, '__mocks/bgg-collection-single-item-response.xml'), 'utf8');
+            const xml = fs.readFileSync(path.join(__dirname, 'data/bgg-collection-single-item-response.xml'), 'utf8');
             const gamesList = await mapCollectionToGamesList(xml);
             expect(gamesList).toHaveLength(1);
             expect(gamesList[0].title).toEqual('Battlestar Galactica: The Board Game');

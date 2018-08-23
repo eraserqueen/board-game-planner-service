@@ -18,7 +18,7 @@ describe('BGG client', () => {
 
     describe('getCollectionsAsync', () => {
         test('should try request again when status code is 202', async () => {
-            const xmlResponse = fs.readFileSync(path.join(__dirname, '__mocks/bgg-collection-sample-response.xml'), 'utf8');
+            const xmlResponse = fs.readFileSync(path.join(__dirname, 'data/bgg-collection-sample-response.xml'), 'utf8');
             const succeedOnAttemptNum = 3;
             server.on({
                 method: 'GET',
