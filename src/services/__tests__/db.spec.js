@@ -1,12 +1,11 @@
-const path = require('path');
 const fs = require('fs');
-const {USER_NOT_FOUND, USER_CONFLICT} = require("../src/errorMessages");
+const path = require('path');
+const dbFile = path.join(__dirname, '../../../data/__tests__/testDB.json');
+const db = require('../db')(dbFile);
 
+const {USER_NOT_FOUND, USER_CONFLICT} = require("../../errorMessages");
 
 describe('db', () => {
-
-    const dbFile = path.join(__dirname, '../data/testDB.json')
-    const db = require('../src/db')(dbFile);
 
     beforeAll((done) => {
         fs.writeFile(dbFile, null, null, done);

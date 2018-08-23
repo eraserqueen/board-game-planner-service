@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const xml2js = require("xml2js");
-const imageConverter = require("./utils/imageConverter");
+const imageConverter = require("./imageConverter");
 
 async function convertThumbnailToDataUri(game) {
     if(_.isEmpty(game.image) || game.image.startsWith('data')) {

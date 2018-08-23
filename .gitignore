@@ -1,4 +1,4 @@
-test/db.test.json
+data/__tests__/testDB.json
 
 # Logs
 logs

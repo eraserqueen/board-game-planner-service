@@ -1,7 +1,7 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const bcrypt = require('bcryptjs');
-const {USER_NOT_FOUND, USER_CONFLICT} = require("./errorMessages");
+const {USER_NOT_FOUND, USER_CONFLICT} = require("../errorMessages");
 
 module.exports = (dbFile) => {
     this.db = low(new FileSync(dbFile));

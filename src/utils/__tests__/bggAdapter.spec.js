@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const {mapCollectionToGamesList, convertThumbnailToDataUri} = require("../src/bggAdapter");
+const {mapCollectionToGamesList, convertThumbnailToDataUri} = require("../bggAdapter");
 
 
 describe('BGG Adapter', () => {
@@ -35,7 +35,7 @@ describe('BGG Adapter', () => {
             expect(actual).toEqual([]);
         });
         test('maps collection to games list', async () => {
-            const xml = fs.readFileSync(path.join(__dirname, 'data/bgg-collection-single-item-response.xml'), 'utf8');
+            const xml = fs.readFileSync(path.join(__dirname, '../../../data/__tests__/bgg-collection-single-item-response.xml'), 'utf8');
             const gamesList = await mapCollectionToGamesList(xml);
             expect(gamesList).toHaveLength(1);
             expect(gamesList[0].title).toEqual('Battlestar Galactica: The Board Game');

@@ -140,6 +140,11 @@
       "hash": "$2a$10$nsyEdvdINMV9lIPM.PlTvODAZsQO9yYAiwfAQDSbyDCZDaG0btPga",
       "salt": "$2a$10$nsyEdvdINMV9lIPM.PlTvO",
       "avatar": "https://www.gravatar.com/avatar/0ffab42260504ca68e08b5be7a778897?r=pg&d=identicon"
+    },
+    {
+      "name": "Dm",
+      "hash": "$2a$10$1fzoY7LZ0qsI/uRL.ocGsOD3QXoxF1Nl9TrJU3znRCKKqZGIOuFHK",
+      "salt": "$2a$10$1fzoY7LZ0qsI/uRL.ocGsO"
     }
   ]
 }

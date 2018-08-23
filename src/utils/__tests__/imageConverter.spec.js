@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
-const converter = require('../../src/utils/imageConverter');
+const converter = require('../imageConverter');
 
 
 describe('Image Converter', () => {
