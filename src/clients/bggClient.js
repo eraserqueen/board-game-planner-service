@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const http = require('http');
 const https = require('https');
 const Promise = require('promise');
@@ -25,7 +26,7 @@ function makeRequest(options) {
     });
 }
 
-function tryAgainIfNeeded(res) {
+function tryAgainIfNoResults(res) {
     /*
     if user collection is not already cached,
     BGG returns a 202 response and expects a
@@ -37,6 +38,23 @@ function tryAgainIfNeeded(res) {
     return res;
 }
 
+function giveUpIfStillNoResults(res) {
+    if (res.status === 202) {
+        throw new Error('Did not receive results after 3 attempts');
+    }
+    return res;
+}
+
+
+function parseXml(res) {
+    const xml2js = require('xml-js').xml2js;
+    const parsed = xml2js(res.body, {compact: true, nativeType: true, ignoreDeclaration: true});
+    if (parsed.errors) {
+        throw new Error(_.get(parsed, 'errors.error.message._text', 'unknown error'));
+    }
+    return parsed;
+}
+
 module.exports = ({host = 'www.boardgamegeek.com', port = 443}) => ({
     getCollectionAsync: (username) => {
         const options = {
@@ -46,15 +64,12 @@ module.exports = ({host = 'www.boardgamegeek.com', port = 443}) => ({
             path: `/xmlapi/collection/${username}?subtype=boardgame&stats=1&own=1`
         };
         return makeRequest(options)
-            .then(tryAgainIfNeeded)
-            .then(tryAgainIfNeeded)
-            .then(res => {
-                if (res.status === 200 && res.body) return res.body;
-                else throw new Error('invalid response from server')
-            })
-            .catch(err => {
-                console.error(err);
-                return null;
+            .then(tryAgainIfNoResults)
+            .then(tryAgainIfNoResults)
+            .then(giveUpIfStillNoResults)
+            .then(parseXml)
+            .catch(httpError => {
+                throw new Error(httpError);
             });
     }
 });

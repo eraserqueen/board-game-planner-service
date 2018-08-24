@@ -16,47 +16,80 @@ describe('BGG client', () => {
         server.stop(done);
     });
 
+    const acceptedResponseXml = fs.readFileSync(path.join(__dirname, '../__mocks__/getCollectionAcceptedResponse.xml'), 'utf8');
+    const okResponseXml = fs.readFileSync(path.join(__dirname, '../__mocks__/getCollectionOkResponse.xml'), 'utf8');
+    const errorResponseXml = fs.readFileSync(path.join(__dirname, '../__mocks__/getCollectionErrorResponse.xml'), 'utf8');
+    const jsonResponse = JSON.parse(fs.readFileSync(path.join(__dirname, '../__mocks__/getCollectionOkResponse.json'), 'utf8'));
+
     describe('getCollectionsAsync', () => {
-        test('should try request again when status code is 202', async () => {
-            const xmlResponse = fs.readFileSync(path.join(__dirname, '../../../data/__tests__/bgg-collection-sample-response.xml'), 'utf8');
+        test('should return collection as json', async () => {
+            server.on({
+                method: 'GET',
+                path: '*',
+                reply: {
+                    status: 200,
+                    body: okResponseXml
+                }
+            });
+            await expect(client.getCollectionAsync('eraserqueen')).resolves.toEqual(jsonResponse);
+        });
+        test('should try request again when client receives ACCEPTED response code', async () => {
             const succeedOnAttemptNum = 3;
             server.on({
                 method: 'GET',
                 path: '*',
                 reply: {
-                    status: () => server.requests().length === succeedOnAttemptNum ? 200 : 202,
+                    status: () => {
+                        if (server.requests().length === succeedOnAttemptNum) {
+                            return 200;
+                        }
+                        return 202;
+                    },
                     body: () => {
                         if (server.requests().length === succeedOnAttemptNum) {
-                            return xmlResponse;
+                            return okResponseXml;
                         }
+                        return acceptedResponseXml;
                     }
                 }
             });
-            const collection = await client.getCollectionAsync('eraserqueen');
-            expect(collection).toEqual(xmlResponse);
+            await expect(client.getCollectionAsync('eraserqueen')).resolves.toEqual(jsonResponse);
             expect(server.requests()).toHaveLength(succeedOnAttemptNum);
         });
-        test(
-            'should fail if server does not return a success response after 3 attempts',
-            async () => {
-                server.on({
-                    method: 'GET',
-                    path: '*',
-                    reply: {status: 202}
-                });
-                const collection = await client.getCollectionAsync('eraserqueen');
-                expect(collection).toBeNull();
-                expect(server.requests()).toHaveLength(3);
-            }
-        );
-        test('should fail if server returns an error', async () => {
+        test('should return error if server does not return a success response after 3 attempts', async () => {
             server.on({
                 method: 'GET',
                 path: '*',
-                reply: {status: 400}
+                reply: {
+                    status: 202,
+                    body: acceptedResponseXml
+                }
             });
-            const collection = await client.getCollectionAsync('eraserqueen');
-            expect(collection).toBeNull();
+            await expect(client.getCollectionAsync('eraserqueen')).rejects.toThrowError('Did not receive results after 3 attempts');
+            expect(server.requests()).toHaveLength(3);
+        });
+        test('should throw if server returns an error message', async () => {
+            server.on({
+                method: 'GET',
+                path: '*',
+                reply: {
+                    status: 200,
+                    body: errorResponseXml
+                }
+            });
+            await expect(client.getCollectionAsync('eraserqueen')).rejects.toThrowError('Invalid username specified');
+            expect(server.requests()).toHaveLength(1);
+        });
+        test('should throw if server throws', async () => {
+            server.on({
+                method: 'GET',
+                path: '*',
+                reply: {
+                    status: 500,
+                    body: ''
+                }
+            });
+            await expect(client.getCollectionAsync('eraserqueen')).rejects.toThrowError('request failed with status code 500');
             expect(server.requests()).toHaveLength(1);
         });
     });

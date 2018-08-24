@@ -1,33 +1,35 @@
 const _ = require('lodash');
-const xml2js = require("xml2js");
 const imageConverter = require("./imageConverter");
 
 async function convertThumbnailToDataUri(game) {
-    if(_.isEmpty(game.image) || game.image.startsWith('data')) {
+    if (_.isEmpty(game.image) || game.image.startsWith('data')) {
         return game;
     }
     return await imageConverter.fromUrl(game.image).then(image => Object.assign({}, game, {image}));
 }
 
-function mapCollectionToGamesList(xml) {
-    const parser = new xml2js.Parser();
-    let gamesList = [];
-    parser.parseString(xml, (err, parsed) => {
-        if (!err && !_.isEmpty(_.get(parsed, 'items.item'))) {
-            gamesList = parsed.items.item.map(item =>
-                ({
-                    title: item.name[0]._,
-                    image: item.thumbnail[0],
-                    minPlayers: parseInt(item.stats[0].$.minplayers),
-                    maxPlayers: parseInt(item.stats[0].$.maxplayers),
-                    playingTime: parseInt(item.stats[0].$.playingtime),
-                }));
-        }
-    });
-    if(_.isEmpty(gamesList)) {
-        return gamesList;
+function mapAttributes(item) {
+    return {
+        title: item.name._text,
+        image: item.thumbnail._text,
+        minPlayers: parseInt(item.stats._attributes.minplayers),
+        maxPlayers: parseInt(item.stats._attributes.maxplayers),
+        playingTime: parseInt(item.stats._attributes.playingtime),
+    };
+}
+
+function mapCollectionToGamesList(json) {
+    let collection = _.get(json, 'items.item');
+    if (_.isEmpty(collection)) {
+        return [];
     }
-    return Promise.all(gamesList.map(convertThumbnailToDataUri));
+    if (collection.name) {
+        collection = new Array(collection);
+    }
+    return Promise.all(collection
+        .map(mapAttributes)
+        .map(convertThumbnailToDataUri)
+    );
 }
 
 module.exports = {
