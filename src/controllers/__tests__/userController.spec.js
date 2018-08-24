@@ -2,9 +2,12 @@ jest.mock('lowdb');
 jest.mock('path');
 jest.mock('../../services/db');
 jest.mock('../../services/auth');
+
 const db = require('../../services/db');
 const auth = require('../../services/auth');
 const userController = require('../userController');
+const {USER_CONFLICT, USER_NOT_FOUND} = require("../../errorMessages");
+
 
 describe('User Controller', () => {
     const resJsonMock = jest.fn();
@@ -13,30 +16,36 @@ describe('User Controller', () => {
     };
 
     describe('auth', () => {
-        test('returns error when incoming request is malformed', () => {
-            userController.auth({}, res);
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(db.findUser).not.toHaveBeenCalled();
-        });
+        [
+            {},
+            {username: 'user'},
+            {password: 'password'}
+        ].forEach(badRequest =>
+            test('returns error when incoming request is malformed', () => {
+                userController.auth(badRequest, res);
+                expect(res.status).toHaveBeenCalledWith(400);
+                expect(db.checkCredentials).not.toHaveBeenCalled();
+            })
+        );
         test('returns error when user credentials are invalid', () => {
-            db.findUser.mockImplementation(() => {
+            db.checkCredentials.mockImplementation(() => {
                 throw new Error('user not found');
             });
 
             userController.auth({body: {username: 'invalidUser', password: 'pass'}}, res);
 
-            expect(db.findUser).toHaveBeenCalledWith('invalidUser', 'pass');
+            expect(db.checkCredentials).toHaveBeenCalledWith('invalidUser', 'pass');
             expect(res.status).toHaveBeenCalledWith(500);
             expect(resJsonMock).toHaveBeenCalledWith({error: 'user not found'});
         });
         test('generates JWT when user credentials are valid', () => {
             let user = {name: 'user', avatar: 'data/image:32478odshfduewhfiw'};
-            db.findUser.mockReturnValue(user);
+            db.checkCredentials.mockReturnValue(user);
             auth.getToken.mockReturnValue('a_valid_token');
 
             userController.auth({body: {username: 'user', password: 'pass'}}, res);
 
-            expect(db.findUser).toHaveBeenCalledWith('user', 'pass');
+            expect(db.checkCredentials).toHaveBeenCalledWith('user', 'pass');
             expect(auth.getToken).toHaveBeenCalledWith(user);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(resJsonMock).toHaveBeenCalledWith({
@@ -46,15 +55,21 @@ describe('User Controller', () => {
         });
     });
     describe('register', () => {
-        test('returns error when incoming request is malformed', () => {
-            userController.register({}, res);
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(db.addNewUser).not.toHaveBeenCalled();
-            expect(auth.getToken).not.toHaveBeenCalled();
-        });
+        [
+            {},
+            {username: 'user'},
+            {password: 'password'}
+        ].forEach(badRequest =>
+            test('returns error when incoming request is malformed', () => {
+                userController.register(badRequest, res);
+                expect(res.status).toHaveBeenCalledWith(400);
+                expect(db.addNewUser).not.toHaveBeenCalled();
+                expect(auth.getToken).not.toHaveBeenCalled();
+            })
+        );
         test('returns error when registration failed', () => {
             db.addNewUser.mockImplementation(() => {
-                throw new Error('user already exists');
+                throw new Error(USER_CONFLICT);
             });
 
             userController.register({body: {username: 'invalidUser', password: 'pass'}}, res);
@@ -62,7 +77,7 @@ describe('User Controller', () => {
             expect(db.addNewUser).toHaveBeenCalledWith('invalidUser', 'pass');
             expect(auth.getToken).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(500);
-            expect(resJsonMock).toHaveBeenCalledWith({error: 'user already exists'});
+            expect(resJsonMock).toHaveBeenCalledWith({error: USER_CONFLICT});
         });
         test('generates JWT when registration was successful', () => {
             let user = {name: 'user', avatar: 'data/image:32478odshfduewhfiw'};
@@ -80,5 +95,29 @@ describe('User Controller', () => {
             });
         });
 
+    });
+    describe('getProfile', () => {
+        test('returns error when user is not found', () => {
+            db.findUser.mockImplementation(() => {
+                throw new Error(USER_NOT_FOUND);
+            });
+
+            userController.getProfile({jwt: {username: 'Invalid'}}, res);
+
+            expect(db.findUser).toHaveBeenCalledWith('Invalid');
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(resJsonMock).toHaveBeenCalledWith({error: USER_NOT_FOUND});
+        });
+        test('returns user data', () => {
+            const userData = {name: 'Valid', avatar: 'data/image;189d1duiiqeh389qh'};
+            db.findUser.mockReturnValue(userData);
+
+            userController.getProfile({jwt: {username: 'Valid'}}, res);
+
+            expect(db.findUser).toHaveBeenCalledWith('Valid');
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(resJsonMock).toHaveBeenCalledWith(userData);
+
+        });
     });
 });

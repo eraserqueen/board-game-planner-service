@@ -9,7 +9,7 @@ module.exports = {
             res.status(400).json({error: USERNAME_OR_PASSWORD_MISSING});
         } else {
             try {
-                const user = db.findUser(req.body.username, req.body.password);
+                const user = db.checkCredentials(req.body.username, req.body.password);
                 res.status(200).json({
                     user,
                     token: auth.getToken(user)
@@ -34,6 +34,15 @@ module.exports = {
                 res.status(500).json({error: error.message});
             }
         }
-    }
+    },
+
+    getProfile: (req, res) => {
+        try {
+            const user = db.findUser(_.get(req, 'jwt.username'));
+            res.status(200).json(user);
+        } catch(error) {
+            res.status(500).json({error: error.message});
+        }
+    },
 
 };

@@ -3,42 +3,40 @@ const authController = require('../authController');
 jest.mock('../../services/auth');
 
 describe('Auth Controller', () => {
+    const validHeaders = {authorization: 'Bearer this_is_a_valid_token'};
     const next = jest.fn();
     const resJsonMock = jest.fn();
     const res = {
         status: jest.fn().mockReturnValue({json: resJsonMock}),
     };
+    [
+        {method: 'POST', path: '/auth'},
+        {method: 'POST', path: '/register'}
+    ].forEach(unAuthReq =>
+        test('does not verify JWT on public endpoints', () => {
+            authController(unAuthReq, res, next);
+            expect(next).toBeCalled();
+            expect(res.status).not.toHaveBeenCalled();
+        }));
+    [
+        {method: 'GET', path: '/events', headers: validHeaders},
+        {method: 'GET', path: '/games', headers: validHeaders},
+        {method: 'GET', path: '/players', headers: validHeaders},
+    ].forEach(req =>
+        test('allows authenticated requests to private endpoints', () => {
+            auth.verifyToken = jest.fn().mockReturnValue({
+                jwt: {
+                    username: 'user',
+                    expires: 123456789
+                }
+            });
+            authController(req, res, next);
+            expect(req.jwt).toEqual({username: 'user', expires: 123456789});
+            expect(next).toHaveBeenCalled();
+            expect(res.status).not.toHaveBeenCalled();
 
-    test('does not verify JWT on /auth call', () => {
-        authController({method: 'POST', path: '/auth'}, res, next);
-        expect(next).toBeCalled();
-        expect(res.status).not.toHaveBeenCalled();
-    });
-    test('does not verify JWT on /register call', () => {
-        authController({method: 'POST', path: '/register'}, res, next);
-        expect(next).toBeCalled();
-        expect(res.status).not.toHaveBeenCalled();
-    });
-    test('verifies JWT on all other calls', () => {
-        auth.verifyToken = jest.fn().mockReturnValue ({
-            jwt: {
-                username: 'user',
-                expires: 123456789
-            }
-        });
-        let req = {
-            method: 'GET',
-            path: '/events',
-            headers: {
-                authorization: 'Bearer this_is_a_valid_token'
-            }
-        };
-        authController(req, res, next);
-        expect(req.jwt).toEqual({username: 'user', expires: 123456789});
-        expect(next).toHaveBeenCalled();
-        expect(res.status).not.toHaveBeenCalled();
-
-    });
+        })
+    );
     test('returns 401 response when login is required and authorization header is missing', () => {
         let req = {
             method: 'GET',
@@ -57,7 +55,8 @@ describe('Auth Controller', () => {
             path: '/events',
             headers: {
                 authorization: 'Bearer expired_token'
-            }
+            },
+            jwt: { username: 'I exist'}
         };
         authController(req, res, next);
         expect(next).not.toBeCalled();

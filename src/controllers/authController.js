@@ -1,4 +1,5 @@
 const auth = require("../services/auth");
+const UNAUTHORIZED_ACCESS = require("../errorMessages").UNAUTHORIZED_ACCESS;
 
 
 function loginRequired(req) {
@@ -12,12 +13,14 @@ module.exports = (req, res, next) => {
     else if (req.headers && req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
         const {error, jwt} = auth.verifyToken(req.headers.authorization.split(' ')[1]);
         if (error) {
+            req.jwt = undefined;
             res.status(401).json({error});
         } else {
             req.jwt = jwt;
             next();
         }
     } else {
-        res.status(401).json({error:'Unauthorized access'});
+        req.jwt = undefined;
+        res.status(401).json({error: UNAUTHORIZED_ACCESS});
     }
 };

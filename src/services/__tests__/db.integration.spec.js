@@ -32,17 +32,26 @@ describe('db', () => {
         });
     });
 
-    describe('findUser', () => {
+    describe('checkCredentials', () => {
         test('returns error when user is not found', () => {
-            expect(() => db.findUser('InvalidUserName', 'irrelevantPassword')).toThrowError(USER_NOT_FOUND);
+            expect(() => db.checkCredentials('InvalidUserName', 'irrelevantPassword')).toThrowError(USER_NOT_FOUND);
         });
         test('returns user when hash matches', () => {
             db.addNewUser('Alice', 'secretPassword');
-            expect(db.findUser('Alice', 'secretPassword')).toEqual({name: 'Alice', avatar: ''});
+            expect(db.checkCredentials('Alice', 'secretPassword')).toEqual({name: 'Alice'});
         });
         test("returns error when hash doesn't match", () => {
             db.addNewUser('Alice', 'secretPassword');
-            expect(() => db.findUser('Alice', 'invalidPassword')).toThrowError(USER_NOT_FOUND);
+            expect(() => db.checkCredentials('Alice', 'invalidPassword')).toThrowError(USER_NOT_FOUND);
+        });
+    });
+    describe('findUser', () => {
+        test('returns error when user is not found', () => {
+            expect(() => db.findUser('InvalidUserName')).toThrowError(USER_NOT_FOUND);
+        });
+        test('returns user when hash matches', () => {
+            db.addNewUser('Alice', 'secretPassword');
+            expect(db.findUser('Alice')).toEqual({name: 'Alice'});
         });
     });
 });

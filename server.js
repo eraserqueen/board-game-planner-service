@@ -1,4 +1,3 @@
-const path = require('path');
 const jsonServer = require('json-server');
 const server = jsonServer.create();
 const dbFile = require('./src/services/db').getDbFilePath();
@@ -16,6 +15,7 @@ server.use(schedulerController);
 // specific routes
 server.post('/auth', userController.auth);
 server.post('/register', userController.register);
+server.get('/me/profile', userController.getProfile);
 
 // JSON-server default router
 server.use(jsonServer.router(dbFile));

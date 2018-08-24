@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const lowDB = require('lowdb');
 const path = require('path');
 const FileSync = require('lowdb/adapters/FileSync');
@@ -14,6 +15,7 @@ function getDbFilePath() {
     return path.join(__dirname, '../../', dbFile);
 }
 
+const sanitizedPlayer = (player) => _.omit(player, ['hash', 'salt']);
 const db = lowDB(new FileSync(getDbFilePath()));
 module.exports = {
     getDbFilePath,
@@ -26,10 +28,18 @@ module.exports = {
             .set('events', [])
             .write();
     },
-    findUser: (name, password) => {
+    checkCredentials: (name, password) => {
         const player = db.get('players').find({name}).value();
         if (player && bcrypt.hashSync(password, player.salt) === player.hash) {
-            return ({name: player.name, avatar: player.avatar || ''});
+            return sanitizedPlayer(player);
+        } else {
+            throw new Error(USER_NOT_FOUND)
+        }
+    },
+    findUser: (name) => {
+        const player = db.get('players').find({name}).value();
+        if (player) {
+            return sanitizedPlayer(player);
         } else {
             throw new Error(USER_NOT_FOUND)
         }
