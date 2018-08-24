@@ -20,12 +20,12 @@ describe('Auth Controller', () => {
         expect(res.status).not.toHaveBeenCalled();
     });
     test('verifies JWT on all other calls', () => {
-        auth.verifyToken.mockImplementation(() => ({
+        auth.verifyToken = jest.fn().mockReturnValue ({
             jwt: {
                 username: 'user',
                 expires: 123456789
             }
-        }));
+        });
         let req = {
             method: 'GET',
             path: '/events',
@@ -51,9 +51,7 @@ describe('Auth Controller', () => {
         expect(resJsonMock).toHaveBeenCalledWith({error: 'Unauthorized access'});
     });
     test('returns 401 response when login is required and JWT is invalid', () => {
-        auth.verifyToken.mockImplementation(() => ({
-            error: 'Expired token'
-        }));
+        auth.verifyToken = jest.fn().mockReturnValue({error: 'Expired token'});
         let req = {
             method: 'GET',
             path: '/events',

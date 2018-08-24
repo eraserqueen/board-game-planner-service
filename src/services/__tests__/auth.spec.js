@@ -5,7 +5,7 @@ jest.mock('jsonwebtoken');
 describe('Auth Service', () => {
     describe('getToken', () => {
         test('returns an encoded JWT', () => {
-            jwt.sign.mockReturnValue('a_valid_token');
+            jwt.sign = jest.fn().mockReturnValue('a_valid_token');
             const result = auth.getToken({name: 'Dom'});
             expect(jwt.sign).toHaveBeenCalled();
             expect(result).toEqual('a_valid_token');
@@ -14,7 +14,7 @@ describe('Auth Service', () => {
     describe('verifyToken', () => {
         test('returns a decoded JWT', () => {
             const jwtPayload = {username: 'Dom', exp: Math.round(new Date().getTime()/1000)+9999};
-            jwt.verify.mockReturnValue(jwtPayload);
+            jwt.verify = jest.fn().mockReturnValue(jwtPayload);
 
             const result = auth.verifyToken('a_valid_token');
 
@@ -22,7 +22,7 @@ describe('Auth Service', () => {
             expect(result).toEqual({jwt: jwtPayload});
         });
         test('throws an error when JWT could not be verified', () => {
-            jwt.verify.mockImplementation(() => {
+            jwt.verify = jest.fn().mockImplementation(() => {
                throw new Error('something horrible happened');
             });
 
@@ -33,7 +33,7 @@ describe('Auth Service', () => {
         });
         test('throws an error when JWT has expired', () => {
             const jwtPayload = {username: 'Dom', exp: Math.round(new Date().getTime()/1000)-9999};
-            jwt.verify.mockReturnValue(jwtPayload);
+            jwt.verify = jest.fn().mockReturnValue(jwtPayload);
 
             const result = auth.verifyToken('an_expired_token');
 

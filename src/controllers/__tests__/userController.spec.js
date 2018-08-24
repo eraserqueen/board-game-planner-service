@@ -30,17 +30,55 @@ describe('User Controller', () => {
             expect(resJsonMock).toHaveBeenCalledWith({error: 'user not found'});
         });
         test('generates JWT when user credentials are valid', () => {
-            db.findUser.mockReturnValue({name: 'user', avatar: 'data/image:32478odshfduewhfiw'});
+            let user = {name: 'user', avatar: 'data/image:32478odshfduewhfiw'};
+            db.findUser.mockReturnValue(user);
             auth.getToken.mockReturnValue('a_valid_token');
 
             userController.auth({body: {username: 'user', password: 'pass'}}, res);
 
             expect(db.findUser).toHaveBeenCalledWith('user', 'pass');
+            expect(auth.getToken).toHaveBeenCalledWith(user);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(resJsonMock).toHaveBeenCalledWith({
-                user: {name: 'user', avatar: 'data/image:32478odshfduewhfiw'},
+                user,
                 token: 'a_valid_token'
             });
         });
+    });
+    describe('register', () => {
+        test('returns error when incoming request is malformed', () => {
+            userController.register({}, res);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(db.addNewUser).not.toHaveBeenCalled();
+            expect(auth.getToken).not.toHaveBeenCalled();
+        });
+        test('returns error when registration failed', () => {
+            db.addNewUser.mockImplementation(() => {
+                throw new Error('user already exists');
+            });
+
+            userController.register({body: {username: 'invalidUser', password: 'pass'}}, res);
+
+            expect(db.addNewUser).toHaveBeenCalledWith('invalidUser', 'pass');
+            expect(auth.getToken).not.toHaveBeenCalled();
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(resJsonMock).toHaveBeenCalledWith({error: 'user already exists'});
+        });
+        test('generates JWT when registration was successful', () => {
+            let user = {name: 'user', avatar: 'data/image:32478odshfduewhfiw'};
+            db.addNewUser.mockReturnValue(user);
+            auth.getToken.mockReturnValue('a_valid_token');
+
+            userController.register({body: {username: 'user', password: 'pass'}}, res);
+
+            expect(db.addNewUser).toHaveBeenCalledWith('user', 'pass');
+            expect(auth.getToken).toHaveBeenCalledWith(user);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(resJsonMock).toHaveBeenCalledWith({
+                user,
+                token: 'a_valid_token'
+            });
+        });
+
     });
 });
