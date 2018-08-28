@@ -1,11 +1,11 @@
 const _ = require('lodash');
 const imageConverter = require("./imageConverter");
 
-async function convertThumbnailToDataUri(game) {
+function convertThumbnailToDataUri(game) {
     if (_.isEmpty(game.image) || game.image.startsWith('data')) {
         return game;
     }
-    return await imageConverter.fromUrl(game.image).then(image => Object.assign({}, game, {image}));
+    return imageConverter.fromUrl(game.image).then(image => Object.assign({}, game, {image}));
 }
 
 function mapAttributes(item) {
