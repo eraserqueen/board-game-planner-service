@@ -40,7 +40,7 @@ function tryAgainIfNoResults(res) {
 
 function giveUpIfStillNoResults(res) {
     if (res.status === 202) {
-        throw new Error('Did not receive results after 3 attempts');
+        return Promise.reject('Did not receive results after 3 attempts');
     }
     return res;
 }
@@ -50,16 +50,22 @@ function parseXml(res) {
     const xml2js = require('xml-js').xml2js;
     const parsed = xml2js(res.body, {compact: true, nativeType: true, ignoreDeclaration: true});
     if (parsed.errors) {
-        throw new Error(_.get(parsed, 'errors.error.message._text', 'unknown error'));
+        return Promise.reject(_.get(parsed, 'errors.error.message._text', 'unknown error'));
     }
     return parsed;
 }
 
-module.exports = ({host = 'www.boardgamegeek.com', port = 443}) => ({
+module.exports = {
+    host: 'www.boardgamegeek.com',
+    port: 443,
+    init: ({host, port}) => {
+        this.host = host;
+        this.port = port;
+    },
     getCollectionAsync: (username) => {
         const options = {
-            hostname: host,
-            port,
+            hostname: this.host,
+            port: this.port,
             method: 'GET',
             path: `/xmlapi/collection/${username}?subtype=boardgame&stats=1&own=1`
         };
@@ -67,9 +73,6 @@ module.exports = ({host = 'www.boardgamegeek.com', port = 443}) => ({
             .then(tryAgainIfNoResults)
             .then(tryAgainIfNoResults)
             .then(giveUpIfStillNoResults)
-            .then(parseXml)
-            .catch(httpError => {
-                throw new Error(httpError);
-            });
+            .then(parseXml);
     }
-});
+};

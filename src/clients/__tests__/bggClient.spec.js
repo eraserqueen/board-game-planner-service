@@ -1,16 +1,16 @@
 const path = require('path');
 const fs = require('fs');
 const ServerMock = require('mock-http-server');
-const bggClient = require('../bggClient');
+const client = require('../bggClient');
 
 describe('BGG client', () => {
 
     let mockServerConfig = {host: 'localhost', port: 9000};
     const server = new ServerMock(mockServerConfig);
-    const client = bggClient(mockServerConfig);
 
     beforeEach((done) => {
         server.start(done);
+        client.init(mockServerConfig);
     });
     afterEach((done) => {
         server.stop(done);
@@ -65,10 +65,10 @@ describe('BGG client', () => {
                     body: acceptedResponseXml
                 }
             });
-            await expect(client.getCollectionAsync('eraserqueen')).rejects.toThrowError('Did not receive results after 3 attempts');
+            await expect(client.getCollectionAsync('eraserqueen')).rejects.toEqual('Did not receive results after 3 attempts');
             expect(server.requests()).toHaveLength(3);
         });
-        test('should throw if server returns an error message', async () => {
+        test('should reject promise if server returns an error message', async () => {
             server.on({
                 method: 'GET',
                 path: '*',
@@ -77,10 +77,10 @@ describe('BGG client', () => {
                     body: errorResponseXml
                 }
             });
-            await expect(client.getCollectionAsync('eraserqueen')).rejects.toThrowError('Invalid username specified');
+            await expect(client.getCollectionAsync('eraserqueen')).rejects.toEqual('Invalid username specified');
             expect(server.requests()).toHaveLength(1);
         });
-        test('should throw if server throws', async () => {
+        test('should reject promise if server throws', async () => {
             server.on({
                 method: 'GET',
                 path: '*',
@@ -89,7 +89,7 @@ describe('BGG client', () => {
                     body: ''
                 }
             });
-            await expect(client.getCollectionAsync('eraserqueen')).rejects.toThrowError('request failed with status code 500');
+            await expect(client.getCollectionAsync('eraserqueen')).rejects.toEqual('request failed with status code 500');
             expect(server.requests()).toHaveLength(1);
         });
     });
