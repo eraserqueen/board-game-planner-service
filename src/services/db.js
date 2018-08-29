@@ -8,7 +8,7 @@ const {USER_NOT_FOUND, USER_CONFLICT} = require("../errorMessages");
 function getDbFilePath() {
     let dbFile;
     if (process.env.NODE_ENV === 'test') {
-        dbFile = './data/__tests__/db.json';
+        dbFile = './data/db.test.json';
     } else {
         dbFile = './data/db.json';
     }
@@ -56,6 +56,7 @@ module.exports = {
         db.get('players').push({name, hash, salt}).write();
 
         return ({name, avatar: ''}); // TODO md5 hash for gravatar
-
     },
+    getGamesList: () => db.get('games').value(),
+    setGamesList: (games) => db.set('games', games)
 };

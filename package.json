@@ -4,7 +4,7 @@
   "description": "a quick and dirty API for board-games-planner",
   "scripts": {
     "start": "node server.js",
-    "test": "jest"
+    "test": "jest --watch --coverage"
   },
   "author": "Dominique Rolin",
   "license": "ISC",

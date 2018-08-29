@@ -1,6 +1,8 @@
+
 const _ = require('lodash');
 const db = require('../services/db');
 const auth = require("../services/auth");
+const user = require("../services/games");
 const {USERNAME_OR_PASSWORD_MISSING} = require("../errorMessages");
 
 module.exports = {
@@ -40,9 +42,18 @@ module.exports = {
         try {
             const user = db.findUser(_.get(req, 'jwt.username'));
             res.status(200).json(user);
-        } catch(error) {
+        } catch (error) {
             res.status(500).json({error: error.message});
         }
     },
 
+    synchronizeUserCollection: (req, res) => {
+        try {
+            const updatedCollection = user.synchronizeUserCollection(_.get(req, 'jwt.username'));
+            res.status(200).json(updatedCollection);
+        } catch (error) {
+            res.status(500).json({error: error.message});
+
+        }
+    }
 };

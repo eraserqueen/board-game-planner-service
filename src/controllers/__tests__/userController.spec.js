@@ -2,10 +2,13 @@ jest.mock('lowdb');
 jest.mock('path');
 jest.mock('../../services/db');
 jest.mock('../../services/auth');
+jest.mock('../../services/games');
 
 const db = require('../../services/db');
 const auth = require('../../services/auth');
+const games = require('../../services/games');
 const userController = require('../userController');
+
 const {USER_CONFLICT, USER_NOT_FOUND} = require("../../errorMessages");
 
 
@@ -120,4 +123,17 @@ describe('User Controller', () => {
 
         });
     });
+    describe('synchronizeUserCollection', () => {
+        it('returns error when service throws', () => {
+            games.synchronizeUserCollection.mockReturnValue([{title:'Game'}]);
+
+            userController.synchronizeUserCollection({jwt:{username:'Dom'}}, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(resJsonMock).toHaveBeenCalledWith([{ title: 'Game'}]);
+        });
+        it('returns updated collection when service returns collection', () => {
+
+        });
+    })
 });
