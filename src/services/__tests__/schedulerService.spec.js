@@ -1,4 +1,4 @@
-const scheduler = require("../scheduler");
+const scheduler = require("../schedulerService");
 
 describe('Scheduler', () => {
     describe('run', () => {

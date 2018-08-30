@@ -1,24 +1,24 @@
-jest.mock('../../services/auth');
-jest.mock('../../services/db');
+jest.mock('../../services/authService');
+jest.mock('../../services/userService');
 jest.mock('../../clients/bggClient');
 jest.mock('../../utils/bggAdapter');
 
 const bggClient = require('../../clients/bggClient');
 const bggAdapter = require('../../utils/bggAdapter');
-const dbMock = require('../../services/db')();
+const dbClientMock = require('../../clients/__mocks__/dbClient');
 
 describe('Games Service', () => {
 
     describe('synchronizeUserCollection', () => {
         test('rejects promise when bggClient failed', async () => {
             bggClient.getCollectionAsync = jest.fn().mockRejectedValue('something horrible happened');
-            const gamesService = require("../games")(dbMock);
+            const gamesService = require("../gamesService")(dbClientMock);
 
             await expect(gamesService.synchronizeUserCollection('you')).rejects.toEqual('something horrible happened');
 
             expect(bggAdapter.mapCollectionToGamesList).not.toHaveBeenCalled();
-            expect(dbMock.getGamesList).not.toHaveBeenCalled();
-            expect(dbMock.setGamesList).not.toHaveBeenCalled();
+            expect(dbClientMock.getGames).not.toHaveBeenCalled();
+            expect(dbClientMock.setGames).not.toHaveBeenCalled();
         });
         [
             {
@@ -80,14 +80,14 @@ describe('Games Service', () => {
             test(scenario, async () => {
                 bggClient.getCollectionAsync = jest.fn().mockResolvedValue({});
                 bggAdapter.mapCollectionToGamesList = jest.fn().mockReturnValue(userCollection);
-                dbMock.getGamesList.mockReturnValue(oldGamesList);
-                const gamesService = require('../games')(dbMock);
+                dbClientMock.getGames.mockReturnValue(oldGamesList);
+                const gamesService = require('../gamesService')(dbClientMock);
                 await expect(gamesService.synchronizeUserCollection('you')).resolves.toEqual(updatedGamesList);
 
 
                 expect(bggAdapter.mapCollectionToGamesList).toHaveBeenCalled();
-                expect(dbMock.getGamesList).toHaveBeenCalled();
-                expect(dbMock.setGamesList).toHaveBeenCalledWith(updatedGamesList);
+                expect(dbClientMock.getGames).toHaveBeenCalled();
+                expect(dbClientMock.setGames).toHaveBeenCalledWith(updatedGamesList);
             })
         );
     });

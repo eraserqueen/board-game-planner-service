@@ -3,9 +3,9 @@ const server = jsonServer.create();
 
 const dbClient = require('./src/clients/lowDbClient');
 const
-    dbService = require('./src/services/db')(dbClient),
-    authService = require('./src/services/auth'),
-    gamesService = require('./src/services/games')(dbService);
+    dbService = require('./src/services/userService')(dbClient),
+    authService = require('./src/services/authService'),
+    gamesService = require('./src/services/gamesService')(dbClient);
 
 const
     authController = require('./src/controllers/authController'),

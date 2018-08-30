@@ -34,7 +34,5 @@ module.exports = (dbClient) => {
 
             return ({name, avatar: ''}); // TODO md5 hash for gravatar
         },
-        getGamesList: () => dbClient.getGames(),
-        setGamesList: (games) => dbClient.setGames(games)
     });
 };

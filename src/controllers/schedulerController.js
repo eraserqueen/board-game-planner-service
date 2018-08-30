@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const scheduler = require("../services/scheduler");
+const scheduler = require("../services/schedulerService");
 
 module.exports = (req, res, next) => {
     const shouldRun = req.method === 'PUT'

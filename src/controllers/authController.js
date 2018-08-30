@@ -1,4 +1,4 @@
-const auth = require("../services/auth");
+const auth = require("../services/authService");
 const UNAUTHORIZED_ACCESS = require("../errorMessages").UNAUTHORIZED_ACCESS;
 
 

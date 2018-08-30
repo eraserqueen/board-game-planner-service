@@ -3,12 +3,12 @@ const assert = require('assert');
 const bggClient = require("../clients/bggClient");
 const bggAdapter = require("../utils/bggAdapter");
 
-module.exports = (dbService) => ({
+module.exports = (dbClient) => ({
     synchronizeUserCollection: (owner) => {
         return bggClient.getCollectionAsync(owner)
             .then(bggAdapter.mapCollectionToGamesList)
             .then(userCollection => {
-                const allGames = dbService.getGamesList();
+                const allGames = dbClient.getGames();
 
                 assert(userCollection instanceof Array);
                 assert(allGames instanceof Array);
@@ -40,7 +40,7 @@ module.exports = (dbService) => ({
                     .map(game => ({...game, ownedBy: [owner]}));
 
                 const newGamesList = _.concat(updatedGames, newGames);
-                dbService.setGamesList(newGamesList);
+                dbClient.setGames(newGamesList);
                 return newGamesList;
             })
     }

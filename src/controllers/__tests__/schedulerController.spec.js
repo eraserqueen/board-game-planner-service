@@ -1,6 +1,6 @@
+jest.mock('../../services/schedulerService');
 const schedulerController = require('../schedulerController');
-const scheduler = require('../../services/scheduler');
-jest.mock('../../services/scheduler');
+const scheduler = require('../../services/schedulerService');
 
 describe('Scheduler Controller', () => {
     const next = jest.fn();

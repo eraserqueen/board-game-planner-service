@@ -1,16 +1,13 @@
 jest.mock('bcryptjs');
 
 const bcrypt = require('bcryptjs');
-const dbClientMock = {};
-const service = require('../db')(dbClientMock);
+const dbClientMock = require('../../clients/__mocks__/dbClient');
+let service = require('../userService')(dbClientMock);
 const {INVALID_CREDENTIALS, USER_NOT_FOUND, USER_CONFLICT} = require("../../errorMessages");
 
-describe('Database service', () => {
+describe('User service', () => {
     beforeEach(() => {
-        dbClientMock.getPlayer = jest.fn().mockName('getPlayerMock');
-        dbClientMock.addPlayer = jest.fn().mockName('addPlayerMock');
-        dbClientMock.getGames = jest.fn().mockName('getGamesMock');
-        dbClientMock.setGames = jest.fn().mockName('setGamesMock');
+        jest.resetAllMocks();
         bcrypt.hashSync = jest.fn().mockReturnValue('hashed_password');
         bcrypt.genSaltSync = jest.fn().mockReturnValue('the_salt');
     });
@@ -44,7 +41,6 @@ describe('Database service', () => {
     });
     describe('addNewUser', () => {
         test('encrypts password and returns created user', () => {
-            bcrypt.hashSync.mockReturnValue('hashed_password');
 
             expect(service.addNewUser('Alice', 'password')).toEqual({name: 'Alice', avatar: ''});
             expect(bcrypt.hashSync).toHaveBeenCalledWith('password', 'the_salt');
@@ -58,19 +54,6 @@ describe('Database service', () => {
             dbClientMock.getPlayer.mockReturnValue({name: 'Alice', hash: 'hashed_password', salt: 'the_salt'});
             expect(() => service.addNewUser('Alice', 'password')).toThrowError(USER_CONFLICT);
 
-        });
-    });
-    describe('getGamesList', () => {
-        test('gets games from db', () => {
-            service.getGamesList();
-            expect(dbClientMock.getGames).toHaveBeenCalled();
-        });
-    });
-    describe('setGamesList', () => {
-        test('uodates games in db', () => {
-            const games = [1,2,3];
-            service.setGamesList(games);
-            expect(dbClientMock.setGames).toHaveBeenCalledWith(games);
         });
     });
 });

@@ -1,6 +1,6 @@
-const auth = require('../../services/auth');
+jest.mock('../../services/authService');
+const auth = require('../../services/authService');
 const authController = require('../authController');
-jest.mock('../../services/auth');
 
 describe('Auth Controller', () => {
     const validHeaders = {authorization: 'Bearer this_is_a_valid_token'};
