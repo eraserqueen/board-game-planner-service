@@ -1,26 +1,24 @@
-jest.mock('lowdb');
-jest.mock('path');
-jest.mock('../../services/db');
 jest.mock('../../services/auth');
+jest.mock('../../services/db');
 jest.mock('../../clients/bggClient');
 jest.mock('../../utils/bggAdapter');
 
-const db = require('../db');
 const bggClient = require('../../clients/bggClient');
 const bggAdapter = require('../../utils/bggAdapter');
-const user = require("../games");
+const dbMock = require('../../services/db')();
 
-describe('User Service', () => {
+describe('Games Service', () => {
 
     describe('synchronizeUserCollection', () => {
         test('rejects promise when bggClient failed', async () => {
             bggClient.getCollectionAsync = jest.fn().mockRejectedValue('something horrible happened');
+            const gamesService = require("../games")(dbMock);
 
-            await expect(user.synchronizeUserCollection('you')).rejects.toEqual('something horrible happened');
+            await expect(gamesService.synchronizeUserCollection('you')).rejects.toEqual('something horrible happened');
 
             expect(bggAdapter.mapCollectionToGamesList).not.toHaveBeenCalled();
-            expect(db.getGamesList).not.toHaveBeenCalled();
-            expect(db.setGamesList).not.toHaveBeenCalled();
+            expect(dbMock.getGamesList).not.toHaveBeenCalled();
+            expect(dbMock.setGamesList).not.toHaveBeenCalled();
         });
         [
             {
@@ -82,14 +80,14 @@ describe('User Service', () => {
             test(scenario, async () => {
                 bggClient.getCollectionAsync = jest.fn().mockResolvedValue({});
                 bggAdapter.mapCollectionToGamesList = jest.fn().mockReturnValue(userCollection);
-                db.getGamesList = jest.fn().mockReturnValue(oldGamesList);
-                db.setGamesList = jest.fn();
+                dbMock.getGamesList.mockReturnValue(oldGamesList);
+                const gamesService = require('../games')(dbMock);
+                await expect(gamesService.synchronizeUserCollection('you')).resolves.toEqual(updatedGamesList);
 
-                await expect(user.synchronizeUserCollection('you')).resolves.toEqual(updatedGamesList);
 
                 expect(bggAdapter.mapCollectionToGamesList).toHaveBeenCalled();
-                expect(db.getGamesList).toHaveBeenCalled();
-                expect(db.setGamesList).toHaveBeenCalledWith(updatedGamesList);
+                expect(dbMock.getGamesList).toHaveBeenCalled();
+                expect(dbMock.setGamesList).toHaveBeenCalledWith(updatedGamesList);
             })
         );
     });

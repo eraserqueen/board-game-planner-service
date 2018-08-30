@@ -1,10 +1,21 @@
 const jsonServer = require('json-server');
 const server = jsonServer.create();
-const dbFile = require('./src/services/db').getDbFilePath();
 
-const authController = require('./src/controllers/authController');
-const schedulerController = require('./src/controllers/schedulerController');
-const userController = require('./src/controllers/userController');
+const dbClient = require('./src/clients/lowDbClient');
+const
+    dbService = require('./src/services/db')(dbClient),
+    authService = require('./src/services/auth'),
+    gamesService = require('./src/services/games')(dbService);
+
+const
+    authController = require('./src/controllers/authController'),
+    schedulerController = require('./src/controllers/schedulerController'),
+    userController = require('./src/controllers/userController')({
+        authService,
+        dbService,
+        gamesService
+    });
+
 
 // middlewares
 server.use(jsonServer.defaults());
@@ -18,7 +29,7 @@ server.post('/register', userController.register);
 server.get('/me/profile', userController.getProfile);
 
 // JSON-server default router
-server.use(jsonServer.router(dbFile));
+server.use(jsonServer.router(dbClient.getDbFilePath()));
 server.listen(3000, () => {
     console.log('JSON Server is running')
 });

@@ -1,62 +1,40 @@
 const _ = require('lodash');
-const lowDB = require('lowdb');
-const path = require('path');
-const FileSync = require('lowdb/adapters/FileSync');
 const bcrypt = require('bcryptjs');
-const {USER_NOT_FOUND, USER_CONFLICT} = require("../errorMessages");
+const {USER_NOT_FOUND, USER_CONFLICT, INVALID_CREDENTIALS} = require("../errorMessages");
 
-function getDbFilePath() {
-    let dbFile;
-    if (process.env.NODE_ENV === 'test') {
-        dbFile = './data/db.test.json';
-    } else {
-        dbFile = './data/db.json';
-    }
-    return path.join(__dirname, '../../', dbFile);
-}
+module.exports = (dbClient) => {
+    const sanitizedPlayer = (player) => _.omit(player, ['hash', 'salt']);
+    return ({
+        checkCredentials: (name, password) => {
+            const player = dbClient.getPlayer(name);
+            if (player && bcrypt.hashSync(password, player.salt) === player.hash) {
+                return sanitizedPlayer(player);
+            } else {
+                throw new Error(INVALID_CREDENTIALS)
+            }
+        },
+        findUser: (name) => {
+            const player = dbClient.getPlayer(name);
+            if (player) {
+                return sanitizedPlayer(player);
+            } else {
+                throw new Error(USER_NOT_FOUND)
+            }
+        },
+        addNewUser: (name, password) => {
+            const existing = dbClient.getPlayer(name);
+            if (existing) {
+                throw new Error(USER_CONFLICT);
+            }
 
-const sanitizedPlayer = (player) => _.omit(player, ['hash', 'salt']);
-const db = lowDB(new FileSync(getDbFilePath()));
-module.exports = {
-    getDbFilePath,
-    init: () => {
-        db.defaults({games: [], players: [], events: []}).write();
-    },
-    clear: () => {
-        db.set('games', [])
-            .set('players', [])
-            .set('events', [])
-            .write();
-    },
-    checkCredentials: (name, password) => {
-        const player = db.get('players').find({name}).value();
-        if (player && bcrypt.hashSync(password, player.salt) === player.hash) {
-            return sanitizedPlayer(player);
-        } else {
-            throw new Error(USER_NOT_FOUND)
-        }
-    },
-    findUser: (name) => {
-        const player = db.get('players').find({name}).value();
-        if (player) {
-            return sanitizedPlayer(player);
-        } else {
-            throw new Error(USER_NOT_FOUND)
-        }
-    },
-    addNewUser: (name, password) => {
-        const existing = db.get('players').find({name}).value();
-        if (existing) {
-            throw new Error(USER_CONFLICT);
-        }
+            const salt = bcrypt.genSaltSync(10);
+            const hash = bcrypt.hashSync(password, salt);
 
-        const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(password, salt);
+            dbClient.addPlayer({name, hash, salt});
 
-        db.get('players').push({name, hash, salt}).write();
-
-        return ({name, avatar: ''}); // TODO md5 hash for gravatar
-    },
-    getGamesList: () => db.get('games').value(),
-    setGamesList: (games) => db.set('games', games)
+            return ({name, avatar: ''}); // TODO md5 hash for gravatar
+        },
+        getGamesList: () => dbClient.getGames(),
+        setGamesList: (games) => dbClient.setGames(games)
+    });
 };

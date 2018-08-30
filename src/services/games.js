@@ -2,15 +2,13 @@ const _ = require('lodash');
 const assert = require('assert');
 const bggClient = require("../clients/bggClient");
 const bggAdapter = require("../utils/bggAdapter");
-const db = require('./db');
 
-module.exports = {
-
+module.exports = (dbService) => ({
     synchronizeUserCollection: (owner) => {
         return bggClient.getCollectionAsync(owner)
             .then(bggAdapter.mapCollectionToGamesList)
             .then(userCollection => {
-                const allGames = db.getGamesList();
+                const allGames = dbService.getGamesList();
 
                 assert(userCollection instanceof Array);
                 assert(allGames instanceof Array);
@@ -42,8 +40,8 @@ module.exports = {
                     .map(game => ({...game, ownedBy: [owner]}));
 
                 const newGamesList = _.concat(updatedGames, newGames);
-                db.setGamesList(newGamesList);
+                dbService.setGamesList(newGamesList);
                 return newGamesList;
             })
     }
-};
+});

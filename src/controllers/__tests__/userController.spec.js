@@ -1,21 +1,21 @@
-jest.mock('lowdb');
-jest.mock('path');
-jest.mock('../../services/db');
 jest.mock('../../services/auth');
+jest.mock('../../services/db');
 jest.mock('../../services/games');
 
-const db = require('../../services/db');
-const auth = require('../../services/auth');
-const games = require('../../services/games');
-const userController = require('../userController');
-
+const authServiceMock = require('../../services/auth');
+const dbServiceMock = require('../../services/db')();
+const gamesServiceMock = require('../../services/games')();
+const serviceMocks = {
+    authService: authServiceMock,
+    dbService: dbServiceMock,
+    gamesService: gamesServiceMock,
+};
 const {USER_CONFLICT, USER_NOT_FOUND} = require("../../errorMessages");
-
 
 describe('User Controller', () => {
     const resJsonMock = jest.fn();
     const res = {
-        status: jest.fn().mockReturnValue({json: resJsonMock}),
+        status: jest.fn().mockReturnValue({json: resJsonMock}).mockName('restStatusMock'),
     };
 
     describe('auth', () => {
@@ -25,31 +25,35 @@ describe('User Controller', () => {
             {password: 'password'}
         ].forEach(badRequest =>
             test('returns error when incoming request is malformed', () => {
+                
+                const userController = require('../userController')(serviceMocks);
+
                 userController.auth(badRequest, res);
                 expect(res.status).toHaveBeenCalledWith(400);
-                expect(db.checkCredentials).not.toHaveBeenCalled();
+                expect(dbServiceMock.checkCredentials).not.toHaveBeenCalled();
             })
         );
         test('returns error when user credentials are invalid', () => {
-            db.checkCredentials.mockImplementation(() => {
-                throw new Error('user not found');
+            dbServiceMock.checkCredentials.mockImplementation(() =>{
+               throw new Error('something horrible happened');
             });
-
+            const userController = require('../userController')(serviceMocks);
             userController.auth({body: {username: 'invalidUser', password: 'pass'}}, res);
 
-            expect(db.checkCredentials).toHaveBeenCalledWith('invalidUser', 'pass');
+            expect(dbServiceMock.checkCredentials).toHaveBeenCalledWith('invalidUser', 'pass');
             expect(res.status).toHaveBeenCalledWith(500);
-            expect(resJsonMock).toHaveBeenCalledWith({error: 'user not found'});
+            expect(resJsonMock).toHaveBeenCalledWith({error: 'something horrible happened'});
         });
         test('generates JWT when user credentials are valid', () => {
             let user = {name: 'user', avatar: 'data/image:32478odshfduewhfiw'};
-            db.checkCredentials.mockReturnValue(user);
-            auth.getToken.mockReturnValue('a_valid_token');
+            dbServiceMock.checkCredentials.mockReturnValue(user);
+            authServiceMock.getToken.mockReturnValue('a_valid_token');
 
+            const userController = require('../userController')(serviceMocks);
             userController.auth({body: {username: 'user', password: 'pass'}}, res);
 
-            expect(db.checkCredentials).toHaveBeenCalledWith('user', 'pass');
-            expect(auth.getToken).toHaveBeenCalledWith(user);
+            expect(dbServiceMock.checkCredentials).toHaveBeenCalledWith('user', 'pass');
+            expect(authServiceMock.getToken).toHaveBeenCalledWith(user);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(resJsonMock).toHaveBeenCalledWith({
                 user,
@@ -64,33 +68,35 @@ describe('User Controller', () => {
             {password: 'password'}
         ].forEach(badRequest =>
             test('returns error when incoming request is malformed', () => {
+                const userController = require('../userController')(serviceMocks);
                 userController.register(badRequest, res);
                 expect(res.status).toHaveBeenCalledWith(400);
-                expect(db.addNewUser).not.toHaveBeenCalled();
-                expect(auth.getToken).not.toHaveBeenCalled();
+                expect(dbServiceMock.addNewUser).not.toHaveBeenCalled();
+                expect(authServiceMock.getToken).not.toHaveBeenCalled();
             })
         );
         test('returns error when registration failed', () => {
-            db.addNewUser.mockImplementation(() => {
+            dbServiceMock.addNewUser.mockImplementation(() => {
                 throw new Error(USER_CONFLICT);
             });
-
+            const userController = require('../userController')(serviceMocks);
             userController.register({body: {username: 'invalidUser', password: 'pass'}}, res);
 
-            expect(db.addNewUser).toHaveBeenCalledWith('invalidUser', 'pass');
-            expect(auth.getToken).not.toHaveBeenCalled();
+            expect(dbServiceMock.addNewUser).toHaveBeenCalledWith('invalidUser', 'pass');
+            expect(authServiceMock.getToken).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(500);
             expect(resJsonMock).toHaveBeenCalledWith({error: USER_CONFLICT});
         });
         test('generates JWT when registration was successful', () => {
             let user = {name: 'user', avatar: 'data/image:32478odshfduewhfiw'};
-            db.addNewUser.mockReturnValue(user);
-            auth.getToken.mockReturnValue('a_valid_token');
+            dbServiceMock.addNewUser.mockReturnValue(user);
+            authServiceMock.getToken.mockReturnValue('a_valid_token');
 
+            const userController = require('../userController')(serviceMocks);
             userController.register({body: {username: 'user', password: 'pass'}}, res);
 
-            expect(db.addNewUser).toHaveBeenCalledWith('user', 'pass');
-            expect(auth.getToken).toHaveBeenCalledWith(user);
+            expect(dbServiceMock.addNewUser).toHaveBeenCalledWith('user', 'pass');
+            expect(authServiceMock.getToken).toHaveBeenCalledWith(user);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(resJsonMock).toHaveBeenCalledWith({
                 user,
@@ -101,23 +107,25 @@ describe('User Controller', () => {
     });
     describe('getProfile', () => {
         test('returns error when user is not found', () => {
-            db.findUser.mockImplementation(() => {
+            dbServiceMock.findUser.mockImplementation(() => {
                 throw new Error(USER_NOT_FOUND);
             });
 
+            const userController = require('../userController')(serviceMocks);
             userController.getProfile({jwt: {username: 'Invalid'}}, res);
 
-            expect(db.findUser).toHaveBeenCalledWith('Invalid');
+            expect(dbServiceMock.findUser).toHaveBeenCalledWith('Invalid');
             expect(res.status).toHaveBeenCalledWith(500);
             expect(resJsonMock).toHaveBeenCalledWith({error: USER_NOT_FOUND});
         });
         test('returns user data', () => {
             const userData = {name: 'Valid', avatar: 'data/image;189d1duiiqeh389qh'};
-            db.findUser.mockReturnValue(userData);
+            dbServiceMock.findUser.mockReturnValue(userData);
 
+            const userController = require('../userController')(serviceMocks);
             userController.getProfile({jwt: {username: 'Valid'}}, res);
 
-            expect(db.findUser).toHaveBeenCalledWith('Valid');
+            expect(dbServiceMock.findUser).toHaveBeenCalledWith('Valid');
             expect(res.status).toHaveBeenCalledWith(200);
             expect(resJsonMock).toHaveBeenCalledWith(userData);
 
@@ -125,8 +133,9 @@ describe('User Controller', () => {
     });
     describe('synchronizeUserCollection', () => {
         it('returns error when service throws', () => {
-            games.synchronizeUserCollection.mockReturnValue([{title:'Game'}]);
+            gamesServiceMock.synchronizeUserCollection.mockReturnValue([{title:'Game'}]);
 
+            const userController = require('../userController')(serviceMocks);
             userController.synchronizeUserCollection({jwt:{username:'Dom'}}, res);
 
             expect(res.status).toHaveBeenCalledWith(200);

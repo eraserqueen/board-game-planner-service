@@ -30,8 +30,8 @@ module.exports = {
 
     // An array of regexp pattern strings used to skip coverage collection
     coveragePathIgnorePatterns: [
-        "/node_modules/",
-        "/data/",
+        "<root_dir>/node_modules/",
+        "lowDbClient.js",
         "/__tests__/",
         "/__mocks__/",
     ],
