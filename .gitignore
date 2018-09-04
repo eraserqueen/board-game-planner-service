@@ -1,5 +1,6 @@
 data/db.test.json
 .idea/*
+.vscode/*
 
 # Logs
 logs
@@ -62,3 +63,5 @@ typings/
 
 # next.js build output
 .next
+board-games-planner-service.iml
+.DS_Store

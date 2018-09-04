@@ -1,10 +1,32 @@
-const jsonServer = require('json-server');
-const server = jsonServer.create();
+let server, dbClient, defaultController;
 
-const dbClient = require('./src/clients/lowDbClient');
+if (process.env.npm_package_config_dbEngine === 'json-server') {
+
+    console.log('Using json-server with local json file');
+
+    let jsonServer = require('json-server');
+    server = jsonServer.create();
+    server.use(jsonServer.defaults());
+    server.use(jsonServer.bodyParser);
+
+    dbClient = require('./src/clients/lowDbClient');
+    defaultController = jsonServer.router(dbClient._getDbFilePath());
+
+} else if (process.env.npm_package_config_dbEngine === 'firebase') {
+    console.log('Using express server with firebase db');
+
+    server = require('express')();
+    server.use(require('body-parser').json());
+
+    dbClient = require('./src/clients/firebaseDbClient');
+    defaultController = null;
+} else {
+    return 'Invalid dbEngine specified in config';
+}
+
 const
-    dbService = require('./src/services/userService')(dbClient),
     authService = require('./src/services/authService'),
+    userService = require('./src/services/userService')(dbClient),
     gamesService = require('./src/services/gamesService')(dbClient);
 
 const
@@ -12,14 +34,11 @@ const
     schedulerController = require('./src/controllers/schedulerController'),
     userController = require('./src/controllers/userController')({
         authService,
-        dbService,
+        userService,
         gamesService
     });
 
-
 // middlewares
-server.use(jsonServer.defaults());
-server.use(jsonServer.bodyParser);
 server.use(authController);
 server.use(schedulerController);
 
@@ -28,8 +47,8 @@ server.post('/auth', userController.auth);
 server.post('/register', userController.register);
 server.get('/me/profile', userController.getProfile);
 
-// JSON-server default router
-server.use(jsonServer.router(dbClient.getDbFilePath()));
+defaultController && server.use(defaultController);
+
 server.listen(3000, () => {
     console.log('JSON Server is running')
 });

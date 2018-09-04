@@ -7,7 +7,7 @@ const userServiceMock = require('../../services/userService')();
 const gamesServiceMock = require('../../services/gamesService')();
 const serviceMocks = {
     authService: authServiceMock,
-    dbService: userServiceMock,
+    userService: userServiceMock,
     gamesService: gamesServiceMock,
 };
 const {USER_CONFLICT, USER_NOT_FOUND} = require("../../errorMessages");
