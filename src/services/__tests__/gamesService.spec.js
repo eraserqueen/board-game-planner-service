@@ -17,7 +17,7 @@ describe('Games Service', () => {
             await expect(gamesService.synchronizeUserCollection('you')).rejects.toEqual('something horrible happened');
 
             expect(bggAdapter.mapCollectionToGamesList).not.toHaveBeenCalled();
-            expect(dbClientMock.getGames).not.toHaveBeenCalled();
+            expect(dbClientMock.getGames).toHaveBeenCalled();
             expect(dbClientMock.setGames).not.toHaveBeenCalled();
         });
         [
@@ -79,8 +79,8 @@ describe('Games Service', () => {
         ].forEach(({scenario, oldGamesList, userCollection, updatedGamesList}) =>
             test(scenario, async () => {
                 bggClient.getCollectionAsync = jest.fn().mockResolvedValue({});
-                bggAdapter.mapCollectionToGamesList = jest.fn().mockReturnValue(userCollection);
-                dbClientMock.getGames.mockReturnValue(oldGamesList);
+                bggAdapter.mapCollectionToGamesList = jest.fn().mockResolvedValue(userCollection);
+                dbClientMock.getGames.mockResolvedValue(oldGamesList);
                 const gamesService = require('../gamesService')(dbClientMock);
                 await expect(gamesService.synchronizeUserCollection('you')).resolves.toEqual(updatedGamesList);
 

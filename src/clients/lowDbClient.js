@@ -1,5 +1,5 @@
 const path = require('path');
-const FileSync = require('lowdb/adapters/FileSync');
+const FileAsync = require('lowdb/adapters/FileAsync');
 
 function _getDbFilePath() {
     let dbFile;
@@ -11,18 +11,22 @@ function _getDbFilePath() {
     return path.join(__dirname, '../../', dbFile);
 }
 
-const lowDB = require('lowdb')(new FileSync(_getDbFilePath()));
-
-lowDB.defaults({games: [], players: [], events: []}).write();
+const lowDB = require('lowdb')(new FileAsync(_getDbFilePath()));
 
 module.exports = {
     _getDbFilePath,
 
-    getPlayer: (name) => lowDB.get('players').find({name}).value(),
-    addPlayer: ({name, hash, salt}) => lowDB.get('players').push({name, hash, salt}).write(),
-    getGames: () => lowDB.get('games').value(),
-    setGames: (games) => lowDB.set('games', games),
-    addEvent: (event) => lowDB.get('events').push(event).write(),
-    getEvent: (id) => lowDB.get('events').find({id}).value(),
-    getEvents: () => lowDB.get('events').value(),
+    getPlayer: (name) => {
+        return lowDB.then(db => db.get('players').find({name}).value());
+    },
+    addPlayer: ({name, hash, salt}) => {
+        return lowDB
+            .then(db => db.get('players').push({name, hash, salt}).write())
+            .then(() => this.getPlayer(name));
+    },
+    getGames: () => lowDB.then(db => db.get('games').value()),
+    setGames: (games) => lowDB.then(db => db.set('games', games)),
+    addEvent: (event) => lowDB.then(db => db.get('events').push(event).write()),
+    getEvent: (id) => lowDB.then(db => db.get('events').find({id}).value()),
+    getEvents: () => lowDB.then(db => db.get('events').value()),
 };

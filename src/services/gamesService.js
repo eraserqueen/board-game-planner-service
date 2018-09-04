@@ -1,17 +1,14 @@
 const _ = require('lodash');
-const assert = require('assert');
 const bggClient = require("../clients/bggClient");
 const bggAdapter = require("../utils/bggAdapter");
 
 module.exports = (dbClient) => ({
     synchronizeUserCollection: (owner) => {
-        return bggClient.getCollectionAsync(owner)
-            .then(bggAdapter.mapCollectionToGamesList)
-            .then(userCollection => {
-                const allGames = dbClient.getGames();
+        const getOnlineList = bggClient.getCollectionAsync(owner).then(bggAdapter.mapCollectionToGamesList);
+        const getDbList = dbClient.getGames();
 
-                assert(userCollection instanceof Array);
-                assert(allGames instanceof Array);
+        return Promise.all([getOnlineList, getDbList])
+            .then( ([userCollection, allGames]) => {
 
                 // update/delete existing games
                 const updatedGames = allGames
