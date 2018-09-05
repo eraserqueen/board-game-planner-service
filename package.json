@@ -8,7 +8,7 @@
     "debug": "node --nolazy --inspect=9229 server.js"
   },
   "config": {
-    "dbEngine": "json-server"
+    "dbEngine": "firebase"
   },
   "author": "Dominique Rolin",
   "license": "ISC",

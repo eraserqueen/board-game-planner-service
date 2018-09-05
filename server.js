@@ -19,7 +19,7 @@ if (process.env.npm_package_config_dbEngine === 'json-server') {
     server.use(require('body-parser').json());
 
     dbClient = require('./src/clients/firebaseDbClient');
-    defaultController = null;
+    defaultController = require('./src/controllers/defaultController')(dbClient);
 } else {
     return 'Invalid dbEngine specified in config';
 }
@@ -47,7 +47,7 @@ server.post('/auth', userController.auth);
 server.post('/register', userController.register);
 server.get('/me/profile', userController.getProfile);
 
-defaultController && server.use(defaultController);
+server.use(defaultController);
 
 server.listen(3000, () => {
     console.log('JSON Server is running')
