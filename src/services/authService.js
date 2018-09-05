@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-
-const JWT_CRYPTO_KEY = 'super_secret_key';
+const {JWT_CRYPTO_KEY} = process.env;
 
 module.exports = {
     getToken: (user) => {

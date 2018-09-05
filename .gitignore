@@ -1,6 +1,7 @@
 data/db.test.json
 .idea/*
 .vscode/*
+.env
 
 # Logs
 logs

@@ -1,9 +1,10 @@
 const _ = require('lodash');
 const firebase = require('firebase');
 const uuid = require('../utils/uuid').generator;
+const {FIREBASE_API_KEY, NODE_ENV} = process.env;
 
 const config = {
-    apiKey: "AIzaSyBFHuBxKLFK3J7iIuk-IgRMsTscUDMV4eY",
+    apiKey: FIREBASE_API_KEY,
     authDomain: "board-games-planner.firebaseapp.com",
     databaseURL: "https://board-games-planner.firebaseio.com",
     projectId: "board-games-planner",
@@ -24,10 +25,7 @@ const mapArrayToDocuments = array => _.reduce(array, (result, item) => {
 }, {});
 
 const _getRef = (ref) => {
-    if (process.env.NODE_ENV === 'prod') {
-        return firebase.database().ref('/prod/' + ref);
-    }
-    return firebase.database().ref('/test/' + ref);
+    return firebase.database().ref('/'+NODE_ENV+'/' + ref);
 };
 
 
@@ -44,6 +42,13 @@ module.exports = {
             .once('value')
             .then(readJSONData);
 
+    },
+    getPlayers: () => {
+        return _getRef('/players')
+            .once('value')
+            .then(readJSONData)
+            .then(mapResultToArray)
+            .then(array => _.sortBy(array, 'name'));
     },
     addPlayer: (player) => {
         return _getRef('players/' + player.name).set(player).then(() => player);

@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "description": "a quick and dirty API for board-games-planner",
   "scripts": {
-    "start": "node $NODE_DEBUG_OPTION server.js",
+    "start": "node -r dotenv/config $NODE_DEBUG_OPTION server.js",
     "test": "jest --coverage",
     "debug": "node --nolazy --inspect=9229 server.js"
   },
@@ -15,6 +15,8 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
+    "dotenv": "^6.0.0",
+    "express": "latest",
     "firebase": "^5.4.1",
     "json-server": "^0.14.0",
     "jsonwebtoken": "^8.3.0",
@@ -23,8 +25,7 @@
     "mongoose": "^5.2.7",
     "morgan": "^1.9.0",
     "promise": "^8.0.1",
-    "xml-js": "^1.6.7",
-    "express": "latest"
+    "xml-js": "^1.6.7"
   },
   "devDependencies": {
     "jest": "^23.5.0",

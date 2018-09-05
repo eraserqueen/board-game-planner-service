@@ -1,0 +1,7 @@
+{
+  "env": {
+    "NODE_ENV": "PROD",
+    "FIREBASE_API_KEY": "@board-games-planner-service-firebase-api-key",
+    "JWT_CRYPTO_KEY": "@board-games-planner-service-jwt-crypto-key"
+  }
+}

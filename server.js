@@ -13,7 +13,7 @@ if (process.env.npm_package_config_dbEngine === 'json-server') {
     defaultController = jsonServer.router(dbClient._getDbFilePath());
 
 } else if (process.env.npm_package_config_dbEngine === 'firebase') {
-    console.log('Using express server with firebase db');
+    console.log('Using express server with firebase db in environment "'+ process.env.NODE_ENV + '"');
 
     server = require('express')();
     server.use(require('body-parser').json());
