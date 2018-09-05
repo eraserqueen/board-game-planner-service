@@ -25,65 +25,67 @@ describe('Games Service', () => {
                 scenario: 'when user collection contains game that is not already in list',
                 oldGamesList: [],
                 userCollection: [
-                    {title: 'bbbbbb'},
+                    {id: 'bbbbbb'},
                 ],
                 updatedGamesList: [
-                    {title: 'bbbbbb', ownedBy: ['you']},
+                    {id: 'bbbbbb', ownedBy: ['you']},
                 ]
             },
             {
                 scenario: 'when user collection contains a game from the list not yet owned by user',
                 oldGamesList: [
-                    {title: 'aaaaaa', ownedBy: ['notyou']},
+                    {id: 'aaaaaa', ownedBy: ['notyou']},
                 ],
                 userCollection: [
-                    {title: 'aaaaaa'},
+                    {id: 'aaaaaa'},
                 ],
                 updatedGamesList: [
-                    {title: 'aaaaaa', ownedBy: ['notyou', 'you']},
+                    {id: 'aaaaaa', ownedBy: ['notyou', 'you']},
                 ]
             },
             {
                 scenario: 'when user collection does not contain a game from the list owned solely by user',
                 oldGamesList: [
-                    {title: 'aaaaaa', ownedBy: ['you']},
-                    {title: 'bbbbbb', ownedBy: ['you']},
+                    {id: 'aaaaaa', ownedBy: ['you']},
+                    {id: 'bbbbbb', ownedBy: ['you']},
                 ],
                 userCollection: [
-                    {title: 'bbbbbb'},
+                    {id: 'bbbbbb'},
                 ],
                 updatedGamesList: [
-                    {title: 'bbbbbb', ownedBy: ['you']},
+                    {id: 'bbbbbb', ownedBy: ['you']},
                 ]
             },
             {
                 scenario: 'when user collection does not contain a game from the list solely owned by someone else',
                 oldGamesList: [
-                    {title: 'aaaaaa', ownedBy: ['notyou']},
+                    {id: 'aaaaaa', ownedBy: ['notyou']},
                 ],
                 userCollection: [],
                 updatedGamesList: [
-                    {title: 'aaaaaa', ownedBy: ['notyou']},
+                    {id: 'aaaaaa', ownedBy: ['notyou']},
                 ]
             },
             {
                 scenario: 'when user collection does not contain a game from the list owned by user and someone else',
                 oldGamesList: [
-                    {title: 'aaaaaa', ownedBy: ['you', 'notyou']},
+                    {id: 'aaaaaa', ownedBy: ['you', 'notyou']},
                 ],
                 userCollection: [],
                 updatedGamesList: [
-                    {title: 'aaaaaa', ownedBy: ['notyou']},
+                    {id: 'aaaaaa', ownedBy: ['notyou']},
                 ]
             }
         ].forEach(({scenario, oldGamesList, userCollection, updatedGamesList}) =>
             test(scenario, async () => {
-                bggClient.getCollectionAsync = jest.fn().mockResolvedValue({});
-                bggAdapter.mapCollectionToGamesList = jest.fn().mockResolvedValue(userCollection);
                 dbClientMock.getGames.mockResolvedValue(oldGamesList);
+                bggClient.getCollectionAsync = jest.fn().mockResolvedValue('not used');
+                bggAdapter.mapCollectionToGamesList = jest.fn().mockReturnValue(userCollection);
+                bggAdapter.convertThumbnailToDataUri = jest.fn().mockImplementation(game => game);
+                dbClientMock.setGames.mockResolvedValue(updatedGamesList);
+
                 const gamesService = require('../gamesService')(dbClientMock);
                 await expect(gamesService.synchronizeUserCollection('you')).resolves.toEqual(updatedGamesList);
-
 
                 expect(bggAdapter.mapCollectionToGamesList).toHaveBeenCalled();
                 expect(dbClientMock.getGames).toHaveBeenCalled();

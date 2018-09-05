@@ -43,9 +43,9 @@ module.exports = ({authService, userService, gamesService}) => ({
         }
     },
 
-    synchronizeUserCollection: (req, res) => {
+    synchronizeUserCollection: async (req, res) => {
         try {
-            const updatedCollection = gamesService.synchronizeUserCollection(_.get(req, 'jwt.username'));
+            const updatedCollection = await gamesService.synchronizeUserCollection(_.get(req, 'jwt.username'));
             res.status(200).json(updatedCollection);
         } catch (error) {
             res.status(500).json({error: error.message});

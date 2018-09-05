@@ -15,10 +15,11 @@ function makeRequest(options) {
                     xml += data;
                 });
                 res.on('end', () => {
+                    console.log('Collection retrieved successfully');
                     resolve({status: res.statusCode, body: xml});
                 })
             } else {
-                reject(`request failed with status code ${res.statusCode}`);
+                reject(new Error(`request failed with status code ${res.statusCode}`));
             }
         }).on('error', (e) => {
             reject(e);
@@ -33,6 +34,7 @@ function tryAgainIfNoResults(res) {
     new request to return the data
     */
     if (res.status === 202) {
+        console.log('Received 202 response, retrying...');
         return makeRequest(res.options);
     }
     return res;
@@ -50,25 +52,24 @@ function parseXml(res) {
     const xml2js = require('xml-js').xml2js;
     const parsed = xml2js(res.body, {compact: true, nativeType: true, ignoreDeclaration: true});
     if (parsed.errors) {
-        return Promise.reject(_.get(parsed, 'errors.error.message._text', 'unknown error'));
+        return Promise.reject(new Error(_.get(parsed, 'errors.error.message._text', 'unknown error')));
     }
     return parsed;
 }
 
 module.exports = {
-    host: 'www.boardgamegeek.com',
-    port: 443,
     init: ({host, port}) => {
         this.host = host;
         this.port = port;
     },
     getCollectionAsync: (username) => {
         const options = {
-            hostname: this.host,
-            port: this.port,
+            hostname: this.host || 'www.boardgamegeek.com',
+            port: this.port || 443,
             method: 'GET',
             path: `/xmlapi/collection/${username}?subtype=boardgame&stats=1&own=1`
         };
+        console.log('Retrieving collection');
         return makeRequest(options)
             .then(tryAgainIfNoResults)
             .then(tryAgainIfNoResults)

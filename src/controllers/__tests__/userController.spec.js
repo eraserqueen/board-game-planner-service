@@ -129,11 +129,11 @@ describe('User Controller', () => {
         });
     });
     describe('synchronizeUserCollection', () => {
-        it('returns error when service throws', () => {
-            gamesServiceMock.synchronizeUserCollection.mockReturnValue([{title: 'Game'}]);
+        it('returns error when service throws', async () => {
+            gamesServiceMock.synchronizeUserCollection.mockResolvedValue([{title: 'Game'}]);
 
             const userController = require('../userController')(serviceMocks);
-            userController.synchronizeUserCollection({jwt: {username: 'Dom'}}, res);
+            await userController.synchronizeUserCollection({jwt: {username: 'Dom'}}, res);
 
             expect(res.status).toHaveBeenCalledWith(200);
             expect(resJsonMock).toHaveBeenCalledWith([{title: 'Game'}]);

@@ -46,6 +46,7 @@ server.use(schedulerController);
 server.post('/auth', userController.auth);
 server.post('/register', userController.register);
 server.get('/me/profile', userController.getProfile);
+server.put('/me/collection/sync', userController.synchronizeUserCollection);
 
 server.use(defaultController);
 

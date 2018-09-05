@@ -2,23 +2,30 @@ const _ = require('lodash');
 const imageConverter = require("./imageConverter");
 
 function convertThumbnailToDataUri(game) {
-    if (_.isEmpty(game.image) || game.image.startsWith('data')) {
+    if (!game || !game.image || game.image.startsWith('data')) {
         return game;
     }
     return imageConverter.fromUrl(game.image).then(image => Object.assign({}, game, {image}));
 }
 
 function mapAttributes(item) {
+    const id = _.get(item, '_attributes.objectid');
+    if (!id) {
+        return;
+    }
+    const playingTime = _.get(item, 'stats._attributes.playingtime');
     return {
-        title: item.name._text,
-        image: item.thumbnail._text,
-        minPlayers: parseInt(item.stats._attributes.minplayers),
-        maxPlayers: parseInt(item.stats._attributes.maxplayers),
-        playingTime: parseInt(item.stats._attributes.playingtime),
+        id: parseInt(id),
+        title: _.get(item, 'name._text', ''),
+        image: _.get(item, 'thumbnail._text', ''),
+        minPlayers: parseInt(_.get(item, 'stats._attributes.minplayers')) || null,
+        maxPlayers: parseInt(_.get(item, 'stats._attributes.maxplayers')) || null,
+        playingTime: playingTime ? parseInt(playingTime) : null
     };
 }
 
 function mapCollectionToGamesList(json) {
+    console.log('Mapping collection to games list');
     let collection = _.get(json, 'items.item');
     if (_.isEmpty(collection)) {
         return [];
@@ -26,10 +33,7 @@ function mapCollectionToGamesList(json) {
     if (collection.name) {
         collection = new Array(collection);
     }
-    return Promise.all(collection
-        .map(mapAttributes)
-        .map(convertThumbnailToDataUri)
-    );
+    return collection.map(mapAttributes);
 }
 
 module.exports = {

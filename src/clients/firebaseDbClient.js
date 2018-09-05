@@ -58,13 +58,14 @@ module.exports = {
             .once('value')
             .then(readJSONData)
             .then(mapResultToArray)
+            .then(array => array.map(game => ({...game, ownedBy: Object.values(game.ownedBy || {})})))
             .then(array => _.sortBy(array, 'title'));
     },
     setGames: (games) => {
         const mapped = mapArrayToDocuments(games);
         return _getRef('games')
             .set(mapped)
-            .then(() => mapped);
+            .then(() => games);
     },
     addEvent: (event) => {
         let eventId = uuid();

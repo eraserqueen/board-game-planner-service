@@ -5,17 +5,19 @@ describe('Firebase DB client', () => {
     const gamesList = [
         {
             "id": "c28a30f2-1ef9-4575-a12c-8c03d5dac2d2",
-            "title": "Dominion"
+            "title": "Dominion",
+            "ownedBy": [ "Dom"]
         },
         {
             "id": "517be091-66bf-4f1d-8738-92b7ef0f48c0",
-            "title": "Evolution"
+            "title": "Evolution",
+            "ownedBy": [ "Dom"]
         },
         {
             "id": "cadf3fc1-3d29-4982-89bd-283378623fbf",
-            "title": "Mechs vs Minions"
+            "title": "Mechs vs Minions",
+            "ownedBy": [ "Dom"]
         }];
-
     const firebaseGamesData = {
         "517be091-66bf-4f1d-8738-92b7ef0f48c0": {"title": "Evolution"},
         "c28a30f2-1ef9-4575-a12c-8c03d5dac2d2": {"title": "Dominion"},
@@ -49,7 +51,8 @@ describe('Firebase DB client', () => {
     test('Games CRUD', async () => {
         await expect(client.setGames(gamesList))
             .resolves
-            .toEqual(firebaseGamesData);
+            .toEqual(gamesList);
+
         await expect(client.getGames())
             .resolves
             .toEqual(gamesList);

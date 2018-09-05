@@ -77,7 +77,7 @@ describe('BGG client', () => {
                     body: errorResponseXml
                 }
             });
-            await expect(client.getCollectionAsync('eraserqueen')).rejects.toEqual('Invalid username specified');
+            await expect(client.getCollectionAsync('eraserqueen')).rejects.toEqual(new Error('Invalid username specified'));
             expect(server.requests()).toHaveLength(1);
         });
         test('should reject promise if server throws', async () => {
@@ -89,7 +89,7 @@ describe('BGG client', () => {
                     body: ''
                 }
             });
-            await expect(client.getCollectionAsync('eraserqueen')).rejects.toEqual('request failed with status code 500');
+            await expect(client.getCollectionAsync('eraserqueen')).rejects.toEqual(new Error('request failed with status code 500'));
             expect(server.requests()).toHaveLength(1);
         });
     });
