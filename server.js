@@ -51,5 +51,5 @@ server.put('/me/collection/sync', userController.synchronizeUserCollection);
 server.use(defaultController);
 
 server.listen(3000, () => {
-    console.log('JSON Server is running')
+    console.log('Server is running')
 });

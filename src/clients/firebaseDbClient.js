@@ -25,7 +25,7 @@ const mapArrayToDocuments = array => _.reduce(array, (result, item) => {
 }, {});
 
 const _getRef = (ref) => {
-    return firebase.database().ref('/'+NODE_ENV+'/' + ref);
+    return firebase.database().ref('/' + NODE_ENV + '/' + ref);
 };
 
 
@@ -71,7 +71,12 @@ module.exports = {
         let eventId = uuid();
         return _getRef('events/' + eventId)
             .set(event)
-            .then(() => eventId);
+            .then(() => ({...event, id: eventId}));
+    },
+    setEvent: (event) => {
+        return _getRef('events/' + event.id)
+            .set(event)
+            .then(() => event);
     },
     getEvent: (eventId) => {
         return _getRef('events/' + eventId)
